@@ -28,30 +28,30 @@ body {
     font-size: 16px;
 }
 .button-section {
-    display: block;
-    justify-content: center;
+    display: flex;
+    justify-content: flex-start;
     gap: 10px;
     margin-bottom: 15px;
 }
 .stButton > button:first-child {
     background-color: #4CAF50;
-    color: white !important;
-    font-weight: bold !important;
-    padding: 10px 20px !important;
-    font-size: 16px !important;
-    border-radius: 5px !important;
-    border: none !important;
-    cursor: pointer !important;
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
 }
 .stButton > button:last-child {
-    background-color: #f44336 !important;
-    color: white !important;
-    font-weight: bold !important;
-    padding: 10px 20px !important;
-    font-size: 16px !important;
-    border-radius: 5px !important;
-    border: none !important;
-    cursor: pointer !important;
+    background-color: #f44336;
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
 }
 .section-header {
     color: #1f1f1f;
