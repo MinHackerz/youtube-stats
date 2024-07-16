@@ -4,7 +4,7 @@ body {
     color: #1f1f1f;
 }
 .title-box {
-    background-color: white;
+    background: linear-gradient(to right, #fceabb, #f8b500);
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -30,7 +30,7 @@ body {
 }
 .button-section {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 10px;
     margin-bottom: 15px;
 }
@@ -115,10 +115,10 @@ body {
 [data-testid="stDataFrame"] > div:first-child {
     width: 100% !important;
 }
-/* Added to place the buttons on the same line in the center of the page */
+/* Added to place the buttons on the same line in the left side of the page */
 .button-section {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
 }
 .footer {
@@ -126,4 +126,5 @@ body {
     padding: 20px 0;
     font-size: 14px;
     color: #666;
-    margin-top:
+    margin-top: 50px;
+}
