@@ -153,7 +153,7 @@ def main():
             st.error(f"An error occurred: {str(e)}")
 
     if reset_button:
-        st.experimental_rerun()
+        st.rerun()
 
 if __name__ == "__main__":
     main()
