@@ -31,8 +31,8 @@ body {
 .button-section {
     display: flex;
     justify-content: center;
-    gap: 20px;
-    margin-bottom: 30px;
+    gap: 10px;
+    margin-bottom: 15px;
 }
 
 .stButton > button:first-child {
@@ -44,7 +44,7 @@ body {
     border-radius: 5px !important;
     border: none !important;
     cursor: pointer !important;
-    display: inline-block;
+    --display: inline-block;
 }
 
 .stButton > button:last-child {
@@ -56,7 +56,7 @@ body {
     border-radius: 5px !important;
     border: none !important;
     cursor: pointer !important;
-    display: inline-block;
+    --display: inline-block;
 }
 
 .section-header {
