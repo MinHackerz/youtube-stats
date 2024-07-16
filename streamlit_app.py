@@ -59,14 +59,11 @@ def main():
     st.markdown("</div>", unsafe_allow_html=True)
 
     # Button section
-    col1, col2, col3 = st.columns([1, 1, 1])
-    with col1:
-        st.markdown("<div class='button-container'>", unsafe_allow_html=True)
-        analyze_button = st.button("Analyze")
-        st.markdown("</div>", unsafe_allow_html=True)
-    with col3:
-        st.markdown("<div class='button-container'>", unsafe_allow_html=True)
-        reset_button = st.button("Reset")
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.markdown("<div class='button-section'>", unsafe_allow_html=True)
+        analyze_button = st.button("Analyze", key="analyze")
+        reset_button = st.button("Reset", key="reset")
         st.markdown("</div>", unsafe_allow_html=True)
 
     if analyze_button and channel_name:
