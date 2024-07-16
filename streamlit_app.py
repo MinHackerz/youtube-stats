@@ -55,7 +55,7 @@ def main():
 
     # Input section
     st.markdown("<div class='input-section'>", unsafe_allow_html=True)
-    channel_name = st.text_input("", placeholder="Enter the YouTube channel username (e.g. @channelname)")
+    channel_name = st.text_input("YouTube Channel Username", placeholder="Enter the YouTube channel username (e.g. @channelname)")
     st.markdown("</div>", unsafe_allow_html=True)
 
     # Button section
