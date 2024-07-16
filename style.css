@@ -1,0 +1,73 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f0f2f6;
+    color: #1f1f1f;
+}
+
+.centered {
+    text-align: center;
+    color: #1f1f1f;
+    padding: 20px 0;
+    font-size: 2.5em;
+    font-weight: bold;
+}
+
+.input-section {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.stTextInput > div > div > input {
+    font-size: 16px;
+}
+
+.stButton > button {
+    width: 100%;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px 0;
+}
+
+.section-header {
+    color: #1f1f1f;
+    font-size: 1.8em;
+    font-weight: bold;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #1f1f1f;
+}
+
+.stMetric {
+    background-color: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stMetric .metric-label {
+    font-weight: bold;
+    font-size: 1em;
+}
+
+.stMetric .metric-value {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #1f1f1f;
+}
+
+.stDataFrame {
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.stPlotlyChart {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+}
