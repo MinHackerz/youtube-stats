@@ -27,13 +27,16 @@ body {
     font-size: 16px;
 }
 
-.button-container {
+.button-section {
     display: flex;
     justify-content: center;
+    gap: 20px;
+    margin-bottom: 30px;
 }
 
-.stButton > button {
-    width: 100%;
+.stButton > button:first-child {
+    background-color: #4CAF50 !important;
+    color: white !important;
     font-weight: bold !important;
     padding: 10px 20px !important;
     font-size: 16px !important;
@@ -42,16 +45,15 @@ body {
     cursor: pointer !important;
 }
 
-/* Styling for the Analyze button */
-.stButton > button:first-child {
-    background-color: #006400 !important;  /* Deep green */
-    color: white !important;
-}
-
-/* Styling for the Reset button */
 .stButton > button:last-child {
-    background-color: #FF0000 !important;  /* Red */
+    background-color: #f44336 !important;
     color: white !important;
+    font-weight: bold !important;
+    padding: 10px 20px !important;
+    font-size: 16px !important;
+    border-radius: 5px !important;
+    border: none !important;
+    cursor: pointer !important;
 }
 
 .section-header {
