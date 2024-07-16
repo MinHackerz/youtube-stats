@@ -55,7 +55,7 @@ def get_video_details(video_id):
 
 def main():
     st.set_page_config(layout="wide", page_title="YouTube Channel Statistics")
-    
+
     # Load custom CSS
     local_css("style.css")
 
@@ -72,7 +72,6 @@ def main():
     with col2:
         st.markdown("<div class='button-section'>", unsafe_allow_html=True)
         analyze_button = st.button("Analyze", key="analyze")
-        # reset_button = st.button("Reset", key="reset")
         st.markdown("</div>", unsafe_allow_html=True)
 
     if analyze_button and channel_input:
@@ -139,7 +138,7 @@ def main():
 
                 # Video Performance by Time
                 st.markdown("<h2 class='section-header'>Video Performance by Time</h2>", unsafe_allow_html=True)
-                fig_performance = px.line(videos_df.sort_values('Published Date'), 
+                fig_performance = px.line(videos_df.sort_values('Published Date'),
                                           x='Published Date', y='Views Count',
                                           hover_data=['Title'],
                                           title='Video Performance by Time')
@@ -164,11 +163,25 @@ def main():
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
 
-    if reset_button:
-        st.rerun()
-
     # Footer
-    st.markdown('<div class="footer">Made with love by <a href="https://www.linkedin.com/in/menajul-hoque/" target="_blank">Menajul Hoque</a></div>', unsafe_allow_html=True)
+    st.markdown("""
+    <style>
+        .footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #f8f9fa;
+            color: #343a40;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 14px;
+        }
+    </style>
+    <div class="footer">
+        Made with <span style="color: #e74c3c;">&#10084;</span> by <a href="https://www.linkedin.com/in/menajul-hoque/" target="_blank">Menajul Hoque</a>
+    </div>
+    """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
