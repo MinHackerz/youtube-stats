@@ -7,11 +7,20 @@ from datetime import datetime
 import plotly.graph_objects as go
 import plotly.express as px
 from isodate import parse_duration
+import re
 
 # Custom CSS to improve the look and feel
 def local_css(file_name):
     with open(file_name, "r") as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+
+# Function to extract channel name from input
+def extract_channel_name(input_string):
+    if input_string.startswith('https://www.youtube.com/'):
+        match = re.search(r'@([\w-]+)', input_string)
+        if match:
+            return '@' + match.group(1)
+    return input_string
 
 # Function to get the channel ID using RapidAPI
 def get_channel_id(channel_name):
@@ -45,17 +54,17 @@ def get_video_details(video_id):
     return response.json()
 
 def main():
-    st.set_page_config(layout="wide", page_title="YouTube Channel Statistics Dashboard")
+    st.set_page_config(layout="wide", page_title="YouTube Channel Statistics")
     
     # Load custom CSS
     local_css("style.css")
 
     # Page header
-    st.markdown("<h1 class='title'>YouTube Channel Statistics Dashboard</h1>", unsafe_allow_html=True)
+    st.markdown('<div class="title-box"><h1 class="title">YouTube Channel Statistics</h1></div>', unsafe_allow_html=True)
 
     # Input section
     st.markdown("<div class='input-section'>", unsafe_allow_html=True)
-    channel_name = st.text_input("YouTube Channel Username", placeholder="Enter the YouTube channel username (e.g. @channelname)")
+    channel_input = st.text_input("YouTube Channel Username or Link", placeholder="Enter the YouTube channel username (e.g. @channelname) or link")
     st.markdown("</div>", unsafe_allow_html=True)
 
     # Button section
@@ -66,9 +75,12 @@ def main():
         reset_button = st.button("Reset", key="reset")
         st.markdown("</div>", unsafe_allow_html=True)
 
-    if analyze_button and channel_name:
+    if analyze_button and channel_input:
         try:
             with st.spinner("Analyzing channel data..."):
+                # Extract channel name from input
+                channel_name = extract_channel_name(channel_input)
+
                 # Step 1: Get the channel ID using RapidAPI
                 channel_id = get_channel_id(channel_name)
 
@@ -154,6 +166,9 @@ def main():
 
     if reset_button:
         st.rerun()
+
+    # Footer
+    st.markdown('<div class="footer">Made with love by <a href="https://www.linkedin.com/in/menajul-hoque/" target="_blank">Menajul Hoque</a></div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
