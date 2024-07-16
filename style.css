@@ -21,6 +21,7 @@ body {
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
+    text-align: center;
 }
 
 .stTextInput > div > div > input {
@@ -43,6 +44,7 @@ body {
     border-radius: 5px !important;
     border: none !important;
     cursor: pointer !important;
+    display: inline-block;
 }
 
 .stButton > button:last-child {
@@ -54,6 +56,7 @@ body {
     border-radius: 5px !important;
     border: none !important;
     cursor: pointer !important;
+    display: inline-block;
 }
 
 .section-header {
@@ -127,4 +130,11 @@ body {
 /* Ensure full width for the video table */
 [data-testid="stDataFrame"] > div:first-child {
     width: 100% !important;
+}
+
+/* Added to place the buttons on the same line in the center of the page */
+.button-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
