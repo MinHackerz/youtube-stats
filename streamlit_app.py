@@ -17,7 +17,7 @@ def local_css(file_name):
 def get_channel_id(channel_name):
     conn = http.client.HTTPSConnection("youtuber-success-estimator.p.rapidapi.com")
     headers = {
-        'x-rapidapi-key': "6a7ee56b6emsh4a1656bcffeeff1p1a28f5jsna6992ab170db",
+        'x-rapidapi-key': st.secrets["rapidapi_key"],
         'x-rapidapi-host': "youtuber-success-estimator.p.rapidapi.com"
     }
     conn.request("GET", f"/api/v0/analytics/creators/estimator?channelName={channel_name}&channelType=youtube", headers=headers)
