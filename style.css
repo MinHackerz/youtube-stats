@@ -3,18 +3,20 @@ body {
     background-color: #f0f2f6;
     color: #1f1f1f;
 }
-
+.title-box {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
 .title {
     text-align: center;
-    background: linear-gradient(45deg, #FF416C, #FF4B2B);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #1f1f1f;
     font-size: 3em;
     font-weight: bold;
-    padding: 20px 0;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    margin: 0;
 }
-
 .input-section {
     background-color: white;
     padding: 20px;
@@ -23,18 +25,15 @@ body {
     margin-bottom: 20px;
     text-align: center;
 }
-
 .stTextInput > div > div > input {
     font-size: 16px;
 }
-
 .button-section {
     display: flex;
     justify-content: center;
     gap: 10px;
     margin-bottom: 15px;
 }
-
 .stButton > button:first-child {
     background-color: #4CAF50 !important;
     color: white !important;
@@ -44,9 +43,7 @@ body {
     border-radius: 5px !important;
     border: none !important;
     cursor: pointer !important;
-    --display: inline-block;
 }
-
 .stButton > button:last-child {
     background-color: #f44336 !important;
     color: white !important;
@@ -56,9 +53,7 @@ body {
     border-radius: 5px !important;
     border: none !important;
     cursor: pointer !important;
-    --display: inline-block;
 }
-
 .section-header {
     color: #1f1f1f;
     font-size: 2em;
@@ -71,7 +66,6 @@ body {
     text-transform: uppercase;
     letter-spacing: 2px;
 }
-
 .metric-box {
     background-color: white;
     padding: 15px;
@@ -80,61 +74,56 @@ body {
     text-align: center;
     height: 100%;
 }
-
 .metric-box h3 {
     font-size: 1em;
     margin-bottom: 10px;
     color: #333;
 }
-
 .metric-box p {
     font-size: 1.5em;
     font-weight: bold;
     color: #1f1f1f;
     margin: 0;
 }
-
 .channel-name {
     background-color: #E8F5E9;
 }
-
 .subscribers {
     background-color: #E3F2FD;
 }
-
 .total-views {
     background-color: #FFF3E0;
 }
-
 .video-count {
     background-color: #F3E5F5;
 }
-
 .channel-created {
     background-color: #E0F2F1;
 }
-
 .stDataFrame {
     border: none;
     border-radius: 10px;
     overflow: hidden;
 }
-
 .stPlotlyChart {
     background-color: white;
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 10px;
 }
-
 /* Ensure full width for the video table */
 [data-testid="stDataFrame"] > div:first-child {
     width: 100% !important;
 }
-
 /* Added to place the buttons on the same line in the center of the page */
 .button-section {
     display: flex;
     justify-content: center;
     align-items: center;
 }
+.footer {
+    text-align: center;
+    padding: 20px 0;
+    font-size: 14px;
+    color: #666;
+    margin-top:
