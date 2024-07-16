@@ -34,7 +34,7 @@ body {
     margin-bottom: 15px;
 }
 .stButton > button:first-child {
-    background-color: #4CAF50 !important;
+    background-color: #4CAF50;
     color: white !important;
     font-weight: bold !important;
     padding: 10px 20px !important;
