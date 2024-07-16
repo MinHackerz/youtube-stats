@@ -1,6 +1,154 @@
 import streamlit as st
+import http.client
+import json
+import requests
+import pandas as pd
+from datetime import datetime
+import plotly.graph_objects as go
+import plotly.express as px
+from isodate import parse_duration
 
-st.title("🎈 My new app")
-st.write(
-    "Let's start building! For help and inspiration, head over to [docs.streamlit.io](https://docs.streamlit.io/)."
-)
+# Custom CSS to improve the look and feel
+def local_css(file_name):
+    with open(file_name, "r") as f:
+        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+
+# Function to get the channel ID using RapidAPI
+def get_channel_id(channel_name):
+    conn = http.client.HTTPSConnection("youtuber-success-estimator.p.rapidapi.com")
+    headers = {
+        'x-rapidapi-key': "6a7ee56b6emsh4a1656bcffeeff1p1a28f5jsna6992ab170db",
+        'x-rapidapi-host': "youtuber-success-estimator.p.rapidapi.com"
+    }
+    conn.request("GET", f"/api/v0/analytics/creators/estimator?channelName={channel_name}&channelType=youtube", headers=headers)
+    res = conn.getresponse()
+    data = res.read()
+    response_data = json.loads(data.decode("utf-8"))
+    return response_data['data']['channel']['id']
+
+# Function to get the channel details
+def get_channel_details(channel_id):
+    url = f'https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id={channel_id}&key={st.secrets["youtube_api_key"]}'
+    response = requests.get(url)
+    return response.json()
+
+# Function to get the channel videos
+def get_channel_videos(channel_id):
+    url = f'https://www.googleapis.com/youtube/v3/search?part=snippet&channelId={channel_id}&maxResults=50&order=date&type=video&key={st.secrets["youtube_api_key"]}'
+    response = requests.get(url)
+    return response.json()
+
+# Function to get video details
+def get_video_details(video_id):
+    url = f'https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id={video_id}&key={st.secrets["youtube_api_key"]}'
+    response = requests.get(url)
+    return response.json()
+
+def main():
+    st.set_page_config(layout="wide", page_title="YouTube Channel Statistics Dashboard")
+    
+    # Load custom CSS
+    local_css("style.css")
+
+    # Page header
+    st.markdown("<h1 class='centered'>YouTube Channel Statistics Dashboard</h1>", unsafe_allow_html=True)
+
+    # Input section
+    st.markdown("<div class='input-section'>", unsafe_allow_html=True)
+    channel_name = st.text_input("", placeholder="Enter the YouTube channel username (e.g. @channelname)")
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col2:
+        analyze_button = st.button("Analyze", key="analyze")
+    with col3:
+        reset_button = st.button("Reset", key="reset")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    if analyze_button and channel_name:
+        try:
+            with st.spinner("Analyzing channel data..."):
+                # Step 1: Get the channel ID using RapidAPI
+                channel_id = get_channel_id(channel_name)
+
+                # Step 2: Use the channel ID to get detailed channel information
+                channel_details = get_channel_details(channel_id)
+                channel_title = channel_details['items'][0]['snippet']['title']
+                subscribers = int(channel_details['items'][0]['statistics']['subscriberCount'])
+                total_views = int(channel_details['items'][0]['statistics']['viewCount'])
+                video_count = int(channel_details['items'][0]['statistics']['videoCount'])
+                channel_created_on = datetime.strptime(channel_details['items'][0]['snippet']['publishedAt'], "%Y-%m-%dT%H:%M:%SZ").strftime("%B %d, %Y")
+
+                # Display Channel Overview
+                st.markdown("<h2 class='section-header'>Channel Overview</h2>", unsafe_allow_html=True)
+                col1, col2, col3, col4, col5 = st.columns(5)
+                col1.metric("Channel Name", channel_title)
+                col2.metric("Subscribers", f"{subscribers:,}")
+                col3.metric("Total Views", f"{total_views:,}")
+                col4.metric("Video Count", f"{video_count:,}")
+                col5.metric("Channel Created On", channel_created_on)
+
+                # Step 3: Use the channel ID to get the channel's videos
+                channel_videos = get_channel_videos(channel_id)
+                videos_data = []
+                for video in channel_videos['items']:
+                    video_id = video['id']['videoId']
+                    video_title = video['snippet']['title']
+                    video_published_at = video['snippet']['publishedAt']
+                    video_details = get_video_details(video_id)
+                    view_count = int(video_details['items'][0]['statistics']['viewCount'])
+                    like_count = int(video_details['items'][0]['statistics']['likeCount'])
+                    comment_count = int(video_details['items'][0]['statistics']['commentCount'])
+                    duration = str(parse_duration(video_details['items'][0]['contentDetails']['duration']))
+                    videos_data.append([video_id, video_title, duration, view_count, like_count, comment_count, video_published_at])
+
+                # Create DataFrame for videos data
+                videos_df = pd.DataFrame(videos_data, columns=['Video ID', 'Title', 'Duration', 'Views Count', 'Likes Count', 'Comments Count', 'Published Date'])
+                videos_df['Published Date'] = pd.to_datetime(videos_df['Published Date'])
+
+                # Top 5 Videos by Views and Top 5 Liked Videos
+                st.markdown("<h2 class='section-header'>Top 5 Videos</h2>", unsafe_allow_html=True)
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    top_5_views = videos_df.nlargest(5, 'Views Count')
+                    fig_views = px.bar(top_5_views, x='Title', y='Views Count', title='Top 5 Videos by Views')
+                    fig_views.update_layout(xaxis_tickangle=-45, height=500)
+                    st.plotly_chart(fig_views, use_container_width=True)
+
+                with col2:
+                    top_5_likes = videos_df.nlargest(5, 'Likes Count')
+                    fig_likes = px.bar(top_5_likes, x='Title', y='Likes Count', title='Top 5 Liked Videos')
+                    fig_likes.update_layout(xaxis_tickangle=-45, height=500)
+                    st.plotly_chart(fig_likes, use_container_width=True)
+
+                # Video Performance by Time
+                st.markdown("<h2 class='section-header'>Video Performance by Time</h2>", unsafe_allow_html=True)
+                fig_performance = px.scatter(videos_df.sort_values('Published Date'), 
+                                             x='Published Date', y='Views Count', 
+                                             size='Views Count', hover_data=['Title'],
+                                             title='Video Performance by Time')
+                fig_performance.update_layout(height=600)
+                st.plotly_chart(fig_performance, use_container_width=True)
+
+                # Engagement Metrics over Time
+                st.markdown("<h2 class='section-header'>Engagement Metrics over Time</h2>", unsafe_allow_html=True)
+                metrics_df = videos_df[['Published Date', 'Views Count', 'Likes Count', 'Comments Count']]
+                metrics_df = metrics_df.sort_values('Published Date')
+                fig_metrics = go.Figure()
+                fig_metrics.add_trace(go.Scatter(x=metrics_df['Published Date'], y=metrics_df['Views Count'], mode='lines+markers', name='Views'))
+                fig_metrics.add_trace(go.Scatter(x=metrics_df['Published Date'], y=metrics_df['Likes Count'], mode='lines+markers', name='Likes'))
+                fig_metrics.add_trace(go.Scatter(x=metrics_df['Published Date'], y=metrics_df['Comments Count'], mode='lines+markers', name='Comments'))
+                fig_metrics.update_layout(title='Engagement Metrics over Time', xaxis_title='Published Date', yaxis_title='Count', height=600)
+                st.plotly_chart(fig_metrics, use_container_width=True)
+
+                # Comprehensive Video Table
+                st.markdown("<h2 class='section-header'>Comprehensive Video Table</h2>", unsafe_allow_html=True)
+                st.dataframe(videos_df.style.highlight_max(axis=0))
+
+        except Exception as e:
+            st.error(f"An error occurred: {str(e)}")
+
+    if reset_button:
+        st.experimental_rerun()
+
+if __name__ == "__main__":
+    main()
