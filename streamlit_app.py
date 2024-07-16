@@ -51,17 +51,20 @@ def main():
     local_css("style.css")
 
     # Page header
-    st.markdown("<h1 class='centered'>YouTube Channel Statistics Dashboard</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='title'>YouTube Channel Statistics Dashboard</h1>", unsafe_allow_html=True)
 
     # Input section
     st.markdown("<div class='input-section'>", unsafe_allow_html=True)
     channel_name = st.text_input("", placeholder="Enter the YouTube channel username (e.g. @channelname)")
-    col1, col2, col3 = st.columns([1, 1, 1])
-    with col2:
-        analyze_button = st.button("Analyze", key="analyze")
-    with col3:
-        reset_button = st.button("Reset", key="reset")
     st.markdown("</div>", unsafe_allow_html=True)
+
+    # Button section
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.markdown("<div class='button-section'>", unsafe_allow_html=True)
+        analyze_button = st.button("Analyze", key="analyze")
+        reset_button = st.button("Reset", key="reset")
+        st.markdown("</div>", unsafe_allow_html=True)
 
     if analyze_button and channel_name:
         try:
@@ -80,11 +83,11 @@ def main():
                 # Display Channel Overview
                 st.markdown("<h2 class='section-header'>Channel Overview</h2>", unsafe_allow_html=True)
                 col1, col2, col3, col4, col5 = st.columns(5)
-                col1.metric("Channel Name", channel_title)
-                col2.metric("Subscribers", f"{subscribers:,}")
-                col3.metric("Total Views", f"{total_views:,}")
-                col4.metric("Video Count", f"{video_count:,}")
-                col5.metric("Channel Created On", channel_created_on)
+                col1.markdown(f"<div class='metric-box channel-name'><h3>Channel Name</h3><p>{channel_title}</p></div>", unsafe_allow_html=True)
+                col2.markdown(f"<div class='metric-box subscribers'><h3>Subscribers</h3><p>{subscribers:,}</p></div>", unsafe_allow_html=True)
+                col3.markdown(f"<div class='metric-box total-views'><h3>Total Views</h3><p>{total_views:,}</p></div>", unsafe_allow_html=True)
+                col4.markdown(f"<div class='metric-box video-count'><h3>Video Count</h3><p>{video_count:,}</p></div>", unsafe_allow_html=True)
+                col5.markdown(f"<div class='metric-box channel-created'><h3>Channel Created On</h3><p>{channel_created_on}</p></div>", unsafe_allow_html=True)
 
                 # Step 3: Use the channel ID to get the channel's videos
                 channel_videos = get_channel_videos(channel_id)
@@ -112,20 +115,22 @@ def main():
                     top_5_views = videos_df.nlargest(5, 'Views Count')
                     fig_views = px.bar(top_5_views, x='Title', y='Views Count', title='Top 5 Videos by Views')
                     fig_views.update_layout(xaxis_tickangle=-45, height=500)
+                    fig_views.update_traces(marker_color='#4CAF50')
                     st.plotly_chart(fig_views, use_container_width=True)
 
                 with col2:
                     top_5_likes = videos_df.nlargest(5, 'Likes Count')
                     fig_likes = px.bar(top_5_likes, x='Title', y='Likes Count', title='Top 5 Liked Videos')
                     fig_likes.update_layout(xaxis_tickangle=-45, height=500)
+                    fig_likes.update_traces(marker_color='#2196F3')
                     st.plotly_chart(fig_likes, use_container_width=True)
 
                 # Video Performance by Time
                 st.markdown("<h2 class='section-header'>Video Performance by Time</h2>", unsafe_allow_html=True)
-                fig_performance = px.scatter(videos_df.sort_values('Published Date'), 
-                                             x='Published Date', y='Views Count', 
-                                             size='Views Count', hover_data=['Title'],
-                                             title='Video Performance by Time')
+                fig_performance = px.line(videos_df.sort_values('Published Date'), 
+                                          x='Published Date', y='Views Count',
+                                          hover_data=['Title'],
+                                          title='Video Performance by Time')
                 fig_performance.update_layout(height=600)
                 st.plotly_chart(fig_performance, use_container_width=True)
 
@@ -142,7 +147,7 @@ def main():
 
                 # Comprehensive Video Table
                 st.markdown("<h2 class='section-header'>Comprehensive Video Table</h2>", unsafe_allow_html=True)
-                st.dataframe(videos_df.style.highlight_max(axis=0))
+                st.dataframe(videos_df.style.highlight_max(axis=0), use_container_width=True)
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
