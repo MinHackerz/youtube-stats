@@ -69,7 +69,8 @@ def main():
     # Load custom CSS
     local_css("style.css")
 
-    # Page header
+    # Page header with logo
+    st.markdown('<div class="logo-container"><img src="https://igtoolsapk.in/wp-content/uploads/2024/07/Youtube-Statistics-Logo-New.png" alt="YouTube Statistics Logo" class="logo"></div>', unsafe_allow_html=True)
     st.markdown('<h1 class="title">YouTube Channel Statistics</h1>', unsafe_allow_html=True)
 
     # Input section
@@ -78,17 +79,48 @@ def main():
     st.markdown("</div>", unsafe_allow_html=True)
 
     # Button section
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.markdown("<div class='button-section'>", unsafe_allow_html=True)
-        analyze_button = st.button("🔍 Analyze", key="analyze")
-        reset_button = st.button("🔄 Reset", key="reset")
-        st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("""
+    <div class="button-section">
+        <button id="analyze-btn" class="stButton">
+            <svg class="button-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            Analyze
+        </button>
+        <button id="reset-btn" class="stButton">
+            <svg class="button-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+            </svg>
+            Reset
+        </button>
+    </div>
+    """, unsafe_allow_html=True)
 
-    if reset_button:
-        st.rerun()
+    # JavaScript for button functionality
+    st.markdown("""
+    <script>
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        
+        analyzeBtn.addEventListener('click', function() {
+            // Trigger Streamlit's analyze button click
+            document.querySelector('.stButton button').click();
+        });
+        
+        resetBtn.addEventListener('click', function() {
+            // Trigger Streamlit's reset button click
+            document.querySelectorAll('.stButton button')[1].click();
+        });
+    </script>
+    """, unsafe_allow_html=True)
 
-    if analyze_button and channel_input:
+    if 'reset' not in st.session_state:
+        st.session_state.reset = False
+
+    if st.session_state.reset:
+        st.experimental_rerun()
+
+    if channel_input:
         try:
             with st.spinner("Analyzing channel data..."):
                 # Extract channel name from input
@@ -160,6 +192,7 @@ def main():
                     fig_views.update_layout(xaxis_tickangle=-45, height=500)
                     fig_views.update_traces(marker_color='#4CAF50', hovertemplate='<b>%{x}</b><br>Views: %{y:,}<br><a href="%{customdata[0]}">Watch Video</a>')
                     fig_views.update_traces(customdata=top_5_views[['Video URL']])
+                    fig_views.update_xaxes(title_text='', ticktext=[f'<a href="{url}">{title}</a>' for title, url in zip(top_5_views['Title'], top_5_views['Video URL'])], tickvals=top_5_views['Title'])
                     st.plotly_chart(fig_views, use_container_width=True)
 
                 with col2:
@@ -168,6 +201,7 @@ def main():
                     fig_likes.update_layout(xaxis_tickangle=-45, height=500)
                     fig_likes.update_traces(marker_color='#2196F3', hovertemplate='<b>%{x}</b><br>Likes: %{y:,}<br><a href="%{customdata[0]}">Watch Video</a>')
                     fig_likes.update_traces(customdata=top_5_likes[['Video URL']])
+                    fig_likes.update_xaxes(title_text='', ticktext=[f'<a href="{url}">{title}</a>' for title, url in zip(top_5_likes['Title'], top_5_likes['Video URL'])], tickvals=top_5_likes['Title'])
                     st.plotly_chart(fig_likes, use_container_width=True)
 
                 # Video Performance by Time
@@ -193,6 +227,21 @@ def main():
                 fig_metrics.update_traces(hovertemplate='<b>%{customdata[0]}</b><br>Date: %{x}<br>%{y:,} %{name}<br><a href="%{customdata[1]}">Watch Video</a>')
                 fig_metrics.update_traces(customdata=metrics_df[['Title', 'Video URL']])
                 st.plotly_chart(fig_metrics, use_container_width=True)
+
+                # Viewers by Country Map
+                st.markdown("<h2 class='section-header'>Viewers by Country</h2>", unsafe_allow_html=True)
+                st.warning("Note: The YouTube API does not provide detailed geographic data for viewers. This map is a placeholder for future implementation.")
+                
+                # Placeholder for Viewers by Country Map
+                placeholder_data = pd.DataFrame({
+                    'country': ['United States', 'Canada', 'United Kingdom', 'Australia', 'Germany'],
+                    'viewers': [1000, 500, 750, 300, 450]
+                })
+                fig_map = px.choropleth(placeholder_data, locations='country', locationmode='country names', color='viewers',
+                                        title='Placeholder: Viewers by Country',
+                                        color_continuous_scale='Viridis')
+                fig_map.update_layout(height=600)
+                st.plotly_chart(fig_map, use_container_width=True)
 
                 # Comprehensive Video Table
                 st.markdown("<h2 class='section-header'>Comprehensive Video Table</h2>", unsafe_allow_html=True)
