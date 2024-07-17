@@ -8,7 +8,6 @@ import plotly.graph_objects as go
 import plotly.express as px
 from isodate import parse_duration
 import re
-import plotly.figure_factory as ff
 
 # Custom CSS to improve the look and feel
 def local_css(file_name):
@@ -38,7 +37,7 @@ def get_channel_id(channel_name):
 
 # Function to get the channel details
 def get_channel_details(channel_id):
-    url = f'https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,demographics&id={channel_id}&key={st.secrets["youtube_api_key"]}'
+    url = f'https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id={channel_id}&key={st.secrets["youtube_api_key"]}'
     response = requests.get(url)
     return response.json()
 
@@ -70,8 +69,13 @@ def main():
     # Load custom CSS
     local_css("style.css")
 
-    # Page header
-    st.markdown('<div class="logo-container"><img src="https://igtoolsapk.in/wp-content/uploads/2024/07/Youtube-Statistics-Logo-New.png" alt="Logo" class="logo"></div>', unsafe_allow_html=True)
+    # Page header with logo
+    st.markdown("""
+    <div style="text-align: center;">
+        <img src="https://igtoolsapk.in/wp-content/uploads/2024/07/Youtube-Statistics-Logo-New.png" alt="YouTube Statistics Logo" style="width: 150px; height: 150px;">
+    </div>
+    """, unsafe_allow_html=True)
+
     st.markdown('<h1 class="title">YouTube Channel Statistics</h1>', unsafe_allow_html=True)
 
     # Input section
@@ -83,8 +87,8 @@ def main():
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.markdown("<div class='button-section'>", unsafe_allow_html=True)
-        analyze_button = st.button("Analyze", key="analyze")
-        reset_button = st.button("Reset", key="reset")
+        analyze_button = st.button("🔍 Analyze", key="analyze")
+        reset_button = st.button("🔄 Reset", key="reset")
         st.markdown("</div>", unsafe_allow_html=True)
 
     if reset_button:
@@ -106,7 +110,6 @@ def main():
                 total_views = int(channel_details['items'][0]['statistics']['viewCount'])
                 video_count = int(channel_details['items'][0]['statistics']['videoCount'])
                 channel_created_on = datetime.strptime(channel_details['items'][0]['snippet']['publishedAt'], "%Y-%m-%dT%H:%M:%SZ").strftime("%B %d, %Y")
-                demographics = channel_details['items'][0]['demographics']
 
                 # Display Channel Overview
                 st.markdown("<h2 class='section-header'>Channel Overview</h2>", unsafe_allow_html=True)
@@ -156,86 +159,44 @@ def main():
                 # Top 5 Videos by Views and Top 5 Liked Videos
                 st.markdown("<h2 class='section-header'>Top 5 Videos</h2>", unsafe_allow_html=True)
                 col1, col2 = st.columns(2)
-
+                top_5_videos = videos_df.nlargest(5, 'Views Count')[['Title', 'Views Count', 'Video URL']]
+                top_5_liked_videos = videos_df.nlargest(5, 'Likes Count')[['Title', 'Likes Count', 'Video URL']]
+                
                 with col1:
-                    top_5_views = videos_df.nlargest(5, 'Views Count')
-                    fig_views = px.bar(top_5_views, x='Title', y='Views Count', title='Top 5 Videos by Views')
-                    fig_views.update_layout(xaxis_tickangle=-45, height=500)
-                    fig_views.update_traces(marker_color='#4CAF50', hovertemplate='<b>%{x}</b><br>Views: %{y:,}<br><a href="%{customdata[0]}">Watch Video</a>')
-                    fig_views.update_traces(customdata=top_5_views[['Video URL']])
-                    st.plotly_chart(fig_views, use_container_width=True)
-
+                    st.markdown("<h3>Top 5 Videos by Views</h3>", unsafe_allow_html=True)
+                    for i, row in top_5_videos.iterrows():
+                        st.markdown(f"<div class='metric-box'><a href='{row['Video URL']}' target='_blank'>{row['Title']}</a> - {row['Views Count']:,} Views</div>", unsafe_allow_html=True)
+                
                 with col2:
-                    top_5_likes = videos_df.nlargest(5, 'Likes Count')
-                    fig_likes = px.bar(top_5_likes, x='Title', y='Likes Count', title='Top 5 Liked Videos')
-                    fig_likes.update_layout(xaxis_tickangle=-45, height=500)
-                    fig_likes.update_traces(marker_color='#2196F3', hovertemplate='<b>%{x}</b><br>Likes: %{y:,}<br><a href="%{customdata[0]}">Watch Video</a>')
-                    fig_likes.update_traces(customdata=top_5_likes[['Video URL']])
-                    st.plotly_chart(fig_likes, use_container_width=True)
+                    st.markdown("<h3>Top 5 Liked Videos</h3>", unsafe_allow_html=True)
+                    for i, row in top_5_liked_videos.iterrows():
+                        st.markdown(f"<div class='metric-box'><a href='{row['Video URL']}' target='_blank'>{row['Title']}</a> - {row['Likes Count']:,} Likes</div>", unsafe_allow_html=True)
 
-                # User Demographics by Age and Gender
-                st.markdown("<h2 class='section-header'>User Demographics</h2>", unsafe_allow_html=True)
-                col1, col2 = st.columns(2)
+                # Time-Series Data of Views, Likes, and Comments
+                st.markdown("<h2 class='section-header'>Videos Analysis Over Time</h2>", unsafe_allow_html=True)
+                time_series_data = videos_df[['Published Date', 'Views Count', 'Likes Count', 'Comments Count']].copy()
+                time_series_data.set_index('Published Date', inplace=True)
+                time_series_data.sort_index(inplace=True)
 
-                with col1:
-                    age_data = [demographics[key] for key in demographics.keys() if key.startswith('ageGroup')]
-                    age_labels = [key.replace('ageGroup', '') for key in demographics.keys() if key.startswith('ageGroup')]
-                    fig_age = px.pie(values=age_data, names=age_labels, title='User Demographics by Age')
-                    st.plotly_chart(fig_age, use_container_width=True)
+                # Line chart for Views, Likes, and Comments over time
+                fig = go.Figure()
+                fig.add_trace(go.Scatter(x=time_series_data.index, y=time_series_data['Views Count'], mode='lines+markers', name='Views Count', line=dict(color='royalblue')))
+                fig.add_trace(go.Scatter(x=time_series_data.index, y=time_series_data['Likes Count'], mode='lines+markers', name='Likes Count', line=dict(color='firebrick')))
+                fig.add_trace(go.Scatter(x=time_series_data.index, y=time_series_data['Comments Count'], mode='lines+markers', name='Comments Count', line=dict(color='green')))
+                fig.update_layout(title='Views, Likes, and Comments Over Time', xaxis_title='Date', yaxis_title='Count')
+                st.plotly_chart(fig, use_container_width=True)
 
-                with col2:
-                    gender_data = [demographics[key] for key in demographics.keys() if key.startswith('gender')]
-                    gender_labels = [key.replace('gender', '') for key in demographics.keys() if key.startswith('gender')]
-                    fig_gender = px.pie(values=gender_data, names=gender_labels, title='User Demographics by Gender')
-                    st.plotly_chart(fig_gender, use_container_width=True)
+                # Pie chart for Top 10 videos by views distribution
+                top_10_videos = videos_df.nlargest(10, 'Views Count')
+                fig = px.pie(top_10_videos, names='Title', values='Views Count', title='Top 10 Videos by Views Distribution')
+                st.plotly_chart(fig, use_container_width=True)
 
-                # Viewers by Country
-                st.markdown("<h2 class='section-header'>Viewers by Country</h2>", unsafe_allow_html=True)
-                country_data = [{'Country': key, 'Viewers': demographics[key]} for key in demographics.keys() if key not in ['ageGroup', 'gender']]
-                country_df = pd.DataFrame(country_data)
-                fig_country = px.choropleth(country_df, locations='Country', locationmode='country names', color='Viewers', title='Viewers by Country')
-                st.plotly_chart(fig_country, use_container_width=True)
-
-                # Video Performance by Time
-                st.markdown("<h2 class='section-header'>Video Performance by Time</h2>", unsafe_allow_html=True)
-                fig_performance = px.line(videos_df.sort_values('Published Date'),
-                                          x='Published Date', y='Views Count',
-                                          hover_data=['Title'],
-                                          title='Video Performance by Time')
-                fig_performance.update_layout(height=600)
-                fig_performance.update_traces(hovertemplate='<b>%{customdata[0]}</b><br>Date: %{x}<br>Views: %{y:,}<br><a href="%{customdata[1]}">Watch Video</a>')
-                fig_performance.update_traces(customdata=videos_df[['Title', 'Video URL']])
-                st.plotly_chart(fig_performance, use_container_width=True)
-
-                # Engagement Metrics over Time
-                st.markdown("<h2 class='section-header'>Engagement Metrics over Time</h2>", unsafe_allow_html=True)
-                metrics_df = videos_df[['Published Date', 'Views Count', 'Likes Count', 'Comments Count', 'Title', 'Video URL']]
-                metrics_df = metrics_df.sort_values('Published Date')
-                fig_metrics = go.Figure()
-                fig_metrics.add_trace(go.Scatter(x=metrics_df['Published Date'], y=metrics_df['Views Count'], mode='lines+markers', name='Views'))
-                fig_metrics.add_trace(go.Scatter(x=metrics_df['Published Date'], y=metrics_df['Likes Count'], mode='lines+markers', name='Likes'))
-                fig_metrics.add_trace(go.Scatter(x=metrics_df['Published Date'], y=metrics_df['Comments Count'], mode='lines+markers', name='Comments'))
-                fig_metrics.update_layout(title='Engagement Metrics over Time', xaxis_title='Published Date', yaxis_title='Count', height=600)
-                fig_metrics.update_traces(hovertemplate='<b>%{customdata[0]}</b><br>Date: %{x}<br>%{y:,} %{name}<br><a href="%{customdata[1]}">Watch Video</a>')
-                fig_metrics.update_traces(customdata=metrics_df[['Title', 'Video URL']])
-                st.plotly_chart(fig_metrics, use_container_width=True)
-
-                # Comprehensive Video Table
-                st.markdown("<h2 class='section-header'>Comprehensive Video Table</h2>", unsafe_allow_html=True)
-                table_df = videos_df.drop(columns=['Thumbnail URL'])
-                table_df['Title'] = table_df.apply(lambda row: f"<a href='{row['Video URL']}' target='_blank'>{row['Title']}</a>", axis=1)
-                table_df = table_df.drop(columns=['Video URL'])
-                st.markdown(table_df.to_html(escape=False, index=False), unsafe_allow_html=True)
+                # Display full data table
+                st.markdown("<h2 class='section-header'>Full Videos Data</h2>", unsafe_allow_html=True)
+                st.dataframe(videos_df[['Title', 'Duration', 'Views Count', 'Likes Count', 'Comments Count', 'Published Date']])
 
         except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
-
-    # Footer
-    st.markdown("""
-    <div class="footer">
-        Made with <span style="color: #e74c3c;">&#10084;</span> by <a href="https://www.linkedin.com/in/menajul-hoque/" target="_blank">Menajul Hoque</a>
-    </div>
-    """, unsafe_allow_html=True)
+            st.error(f"An error occurred: {e}")
 
 if __name__ == "__main__":
     main()
