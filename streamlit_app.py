@@ -86,7 +86,7 @@ def main():
         st.markdown("</div>", unsafe_allow_html=True)
 
     if reset_button:
-        st.experimental_rerun()
+        st.rerun()
 
     if analyze_button and channel_input:
         try:
