@@ -165,6 +165,8 @@ tr:hover {
     width: 100%;
     position: sticky;
     bottom: 0;
+    left: 0;
+    right: 0;
 }
 
 .footer a {
