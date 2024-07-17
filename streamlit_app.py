@@ -63,6 +63,11 @@ def get_video_details(video_id):
     response = requests.get(url)
     return response.json()
 
+def get_channel_demographics(channel_id):
+    url = f'https://www.googleapis.com/youtube/v3/analytics/reports?ids=channel=={channel_id}&startDate=2006-01-01&endDate=2024-01-01&metrics=viewerPercentage&dimensions=ageGroup,gender,country&key={st.secrets["youtube_api_key"]}'
+    response = requests.get(url)
+    return response.json()
+
 def main():
     st.set_page_config(layout="wide", page_title="YouTube Channel Statistics")
 
@@ -134,11 +139,11 @@ def main():
                 # Display Channel Overview
                 st.markdown("<h2 class='section-header'>Channel Overview</h2>", unsafe_allow_html=True)
                 col1, col2, col3, col4, col5 = st.columns(5)
-                col1.markdown(f"<div class='metric-box channel-name'><h3>Channel Name</h3><p>{channel_title}</p></div>", unsafe_allow_html=True)
-                col2.markdown(f"<div class='metric-box subscribers'><h3>Subscribers</h3><p>{subscribers:,}</p></div>", unsafe_allow_html=True)
-                col3.markdown(f"<div class='metric-box total-views'><h3>Total Views</h3><p>{total_views:,}</p></div>", unsafe_allow_html=True)
-                col4.markdown(f"<div class='metric-box video-count'><h3>Video Count</h3><p>{video_count:,}</p></div>", unsafe_allow_html=True)
-                col5.markdown(f"<div class='metric-box channel-created'><h3>Channel Created On</h3><p>{channel_created_on}</p></div>", unsafe_allow_html=True)
+                col1.markdown(f"<div class='metric-box channel-name' style='background-color: #f0f8ff;'><h3>Channel Name</h3><p>{channel_title}</p></div>", unsafe_allow_html=True)
+                col2.markdown(f"<div class='metric-box subscribers' style='background-color: #f5f5dc;'><h3>Subscribers</h3><p>{subscribers:,}</p></div>", unsafe_allow_html=True)
+                col3.markdown(f"<div class='metric-box total-views' style='background-color: #ffe4e1;'><h3>Total Views</h3><p>{total_views:,}</p></div>", unsafe_allow_html=True)
+                col4.markdown(f"<div class='metric-box video-count' style='background-color: #fafad2;'><h3>Video Count</h3><p>{video_count:,}</p></div>", unsafe_allow_html=True)
+                col5.markdown(f"<div class='metric-box channel-created' style='background-color: #e6e6fa;'><h3>Channel Created On</h3><p>{channel_created_on}</p></div>", unsafe_allow_html=True)
 
                 # Step 3: Use the channel ID to get all of the channel's videos
                 channel_videos = get_all_channel_videos(channel_id)
@@ -159,6 +164,21 @@ def main():
                 # Create DataFrame for videos data
                 videos_df = pd.DataFrame(videos_data, columns=['Title', 'Duration', 'Views Count', 'Likes Count', 'Comments Count', 'Published Date', 'Thumbnail URL', 'Video URL'])
                 videos_df['Published Date'] = pd.to_datetime(videos_df['Published Date'])
+
+                # Fetch demographics data
+                demographics_data = get_channel_demographics(channel_id)
+                age_data = {}
+                gender_data = {}
+                country_data = {}
+
+                for row in demographics_data['rows']:
+                    age_group, gender, country, percentage = row[0], row[1], row[2], row[3]
+                    if age_group != 'TOTAL':
+                        age_data[age_group] = age_data.get(age_group, 0) + percentage
+                    if gender != 'TOTAL':
+                        gender_data[gender] = gender_data.get(gender, 0) + percentage
+                    if country != 'TOTAL':
+                        country_data[country] = country_data.get(country, 0) + percentage
 
                 # Most Recent and Most Popular Videos
                 st.markdown("<h2 class='section-header'>Featured Videos</h2>", unsafe_allow_html=True)
@@ -199,22 +219,17 @@ def main():
                     st.plotly_chart(fig_likes, use_container_width=True)
 
                 # User Demographics by Age and Gender
-                demographics = {
-                    'agegroup': {'13-17': 5, '18-24': 20, '25-34': 35, '35-44': 25, '45-54': 10, '55-64': 3, '65+': 2},
-                    'gender': {'Male': 60, 'Female': 40}
-                }
-                
                 st.markdown("<h2 class='section-header'>User Demographics</h2>", unsafe_allow_html=True)
                 col1, col2 = st.columns(2)
 
                 with col1:
-                    age_data = pd.DataFrame(list(demographics['agegroup'].items()), columns=['Age Group', 'Percentage'])
-                    fig_age = px.pie(age_data, values='Percentage', names='Age Group', title='User Demographics by Age')
+                    age_data_df = pd.DataFrame(list(age_data.items()), columns=['Age Group', 'Percentage'])
+                    fig_age = px.pie(age_data_df, values='Percentage', names='Age Group', title='User Demographics by Age')
                     st.plotly_chart(fig_age, use_container_width=True)
 
                 with col2:
-                    gender_data = pd.DataFrame(list(demographics['gender'].items()), columns=['Gender', 'Percentage'])
-                    fig_gender = px.pie(gender_data, values='Percentage', names='Gender', title='User Demographics by Gender')
+                    gender_data_df = pd.DataFrame(list(gender_data.items()), columns=['Gender', 'Percentage'])
+                    fig_gender = px.pie(gender_data_df, values='Percentage', names='Gender', title='User Demographics by Gender')
                     st.plotly_chart(fig_gender, use_container_width=True)
 
                 # Video Performance by Time
@@ -243,11 +258,8 @@ def main():
 
                 # Viewers by Country Map
                 st.markdown("<h2 class='section-header'>Viewers by Country</h2>", unsafe_allow_html=True)
-                country_data = pd.DataFrame({
-                    'Country': ['United States', 'Canada', 'United Kingdom', 'Australia', 'Germany'],
-                    'Viewers': [1000, 500, 750, 300, 450]
-                })
-                fig_map = px.choropleth(country_data, locations='Country', locationmode='country names', color='Viewers',
+                country_data_df = pd.DataFrame(list(country_data.items()), columns=['Country', 'Percentage'])
+                fig_map = px.choropleth(country_data_df, locations='Country', locationmode='country names', color='Percentage',
                                         title='Viewers by Country',
                                         color_continuous_scale='Viridis')
                 fig_map.update_layout(height=600)
