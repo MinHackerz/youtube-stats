@@ -70,6 +70,7 @@ def main():
     local_css("style.css")
 
     # Page header
+    st.markdown('<div style="text-align: center;"><img src="https://igtoolsapk.in/wp-content/uploads/2024/07/Youtube-Statistics-Logo-New.png" alt="Logo" width="150" height="150"></div>', unsafe_allow_html=True)
     st.markdown('<h1 class="title">YouTube Channel Statistics</h1>', unsafe_allow_html=True)
 
     # Input section
@@ -78,12 +79,10 @@ def main():
     st.markdown("</div>", unsafe_allow_html=True)
 
     # Button section
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.markdown("<div class='button-section'>", unsafe_allow_html=True)
-        analyze_button = st.button("🔍 Analyze", key="analyze")
-        reset_button = st.button("🔄 Reset", key="reset")
-        st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("<div style='display: flex; justify-content: center;'>", unsafe_allow_html=True)
+    analyze_button = st.button("Analyze", key="analyze")
+    reset_button = st.button("Reset", key="reset")
+    st.markdown("</div>", unsafe_allow_html=True)
 
     if reset_button:
         st.experimental_rerun()
@@ -170,6 +169,26 @@ def main():
                     fig_likes.update_traces(customdata=top_5_likes[['Video URL']])
                     st.plotly_chart(fig_likes, use_container_width=True)
 
+                # User Demographics by Age and Gender
+                st.markdown("<h2 class='section-header'>User Demographics</h2>", unsafe_allow_html=True)
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    age_demographics = videos_df['Age Group'].value_counts()
+                    fig_age = px.pie(values=age_demographics.values, names=age_demographics.index, title='User Demographics by Age')
+                    st.plotly_chart(fig_age, use_container_width=True)
+
+                with col2:
+                    gender_demographics = videos_df['Gender'].value_counts()
+                    fig_gender = px.pie(values=gender_demographics.values, names=gender_demographics.index, title='User Demographics by Gender')
+                    st.plotly_chart(fig_gender, use_container_width=True)
+
+                # Viewers by Country
+                st.markdown("<h2 class='section-header'>Viewers by Country</h2>", unsafe_allow_html=True)
+                country_demographics = videos_df['Country'].value_counts()
+                fig_country = px.choropleth(locations=country_demographics.index, color=country_demographics.values, title='Viewers by Country')
+                st.plotly_chart(fig_country, use_container_width=True)
+
                 # Video Performance by Time
                 st.markdown("<h2 class='section-header'>Video Performance by Time</h2>", unsafe_allow_html=True)
                 fig_performance = px.line(videos_df.sort_values('Published Date'),
@@ -199,7 +218,7 @@ def main():
                 table_df = videos_df.drop(columns=['Thumbnail URL'])
                 table_df['Title'] = table_df.apply(lambda row: f"<a href='{row['Video URL']}' target='_blank'>{row['Title']}</a>", axis=1)
                 table_df = table_df.drop(columns=['Video URL'])
-                st.markdown(table_df.to_html(escape=False, index=False), unsafe_allow_html=True)
+                st.markdown(table_df.to_html(escape=False, index=False, height=400), unsafe_allow_html=True)
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
