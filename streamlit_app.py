@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 from isodate import parse_duration
 import re
+import plotly.figure_factory as ff
 
 # Custom CSS to improve the look and feel
 def local_css(file_name):
@@ -37,7 +38,7 @@ def get_channel_id(channel_name):
 
 # Function to get the channel details
 def get_channel_details(channel_id):
-    url = f'https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id={channel_id}&key={st.secrets["youtube_api_key"]}'
+    url = f'https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,demographics&id={channel_id}&key={st.secrets["youtube_api_key"]}'
     response = requests.get(url)
     return response.json()
 
@@ -70,7 +71,7 @@ def main():
     local_css("style.css")
 
     # Page header
-    st.markdown('<div style="text-align: center;"><img src="https://igtoolsapk.in/wp-content/uploads/2024/07/Youtube-Statistics-Logo-New.png" alt="Logo" width="150" height="150"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="logo-container"><img src="https://igtoolsapk.in/wp-content/uploads/2024/07/Youtube-Statistics-Logo-New.png" alt="Logo" class="logo"></div>', unsafe_allow_html=True)
     st.markdown('<h1 class="title">YouTube Channel Statistics</h1>', unsafe_allow_html=True)
 
     # Input section
@@ -79,13 +80,15 @@ def main():
     st.markdown("</div>", unsafe_allow_html=True)
 
     # Button section
-    st.markdown("<div style='display: flex; justify-content: center;'>", unsafe_allow_html=True)
-    analyze_button = st.button("Analyze", key="analyze")
-    reset_button = st.button("Reset", key="reset")
-    st.markdown("</div>", unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.markdown("<div class='button-section'>", unsafe_allow_html=True)
+        analyze_button = st.button("Analyze", key="analyze")
+        reset_button = st.button("Reset", key="reset")
+        st.markdown("</div>", unsafe_allow_html=True)
 
     if reset_button:
-        st.rerun()
+        st.experimental_rerun()
 
     if analyze_button and channel_input:
         try:
@@ -103,6 +106,7 @@ def main():
                 total_views = int(channel_details['items'][0]['statistics']['viewCount'])
                 video_count = int(channel_details['items'][0]['statistics']['videoCount'])
                 channel_created_on = datetime.strptime(channel_details['items'][0]['snippet']['publishedAt'], "%Y-%m-%dT%H:%M:%SZ").strftime("%B %d, %Y")
+                demographics = channel_details['items'][0]['demographics']
 
                 # Display Channel Overview
                 st.markdown("<h2 class='section-header'>Channel Overview</h2>", unsafe_allow_html=True)
@@ -170,23 +174,26 @@ def main():
                     st.plotly_chart(fig_likes, use_container_width=True)
 
                 # User Demographics by Age and Gender
-                # st.markdown("<h2 class='section-header'>User Demographics</h2>", unsafe_allow_html=True)
-                # col1, col2 = st.columns(2)
+                st.markdown("<h2 class='section-header'>User Demographics</h2>", unsafe_allow_html=True)
+                col1, col2 = st.columns(2)
 
-                # with col1:
-                #     age_demographics = videos_df['Age Group'].value_counts()
-                #     fig_age = px.pie(values=age_demographics.values, names=age_demographics.index, title='User Demographics by Age')
-                #     st.plotly_chart(fig_age, use_container_width=True)
+                with col1:
+                    age_data = [demographics[key] for key in demographics.keys() if key.startswith('ageGroup')]
+                    age_labels = [key.replace('ageGroup', '') for key in demographics.keys() if key.startswith('ageGroup')]
+                    fig_age = px.pie(values=age_data, names=age_labels, title='User Demographics by Age')
+                    st.plotly_chart(fig_age, use_container_width=True)
 
-                # with col2:
-                #     gender_demographics = videos_df['Gender'].value_counts()
-                #     fig_gender = px.pie(values=gender_demographics.values, names=gender_demographics.index, title='User Demographics by Gender')
-                #     st.plotly_chart(fig_gender, use_container_width=True)
+                with col2:
+                    gender_data = [demographics[key] for key in demographics.keys() if key.startswith('gender')]
+                    gender_labels = [key.replace('gender', '') for key in demographics.keys() if key.startswith('gender')]
+                    fig_gender = px.pie(values=gender_data, names=gender_labels, title='User Demographics by Gender')
+                    st.plotly_chart(fig_gender, use_container_width=True)
 
                 # Viewers by Country
                 st.markdown("<h2 class='section-header'>Viewers by Country</h2>", unsafe_allow_html=True)
-                country_demographics = videos_df['Country'].value_counts()
-                fig_country = px.choropleth(locations=country_demographics.index, color=country_demographics.values, title='Viewers by Country')
+                country_data = [{'Country': key, 'Viewers': demographics[key]} for key in demographics.keys() if key not in ['ageGroup', 'gender']]
+                country_df = pd.DataFrame(country_data)
+                fig_country = px.choropleth(country_df, locations='Country', locationmode='country names', color='Viewers', title='Viewers by Country')
                 st.plotly_chart(fig_country, use_container_width=True)
 
                 # Video Performance by Time
@@ -218,7 +225,7 @@ def main():
                 table_df = videos_df.drop(columns=['Thumbnail URL'])
                 table_df['Title'] = table_df.apply(lambda row: f"<a href='{row['Video URL']}' target='_blank'>{row['Title']}</a>", axis=1)
                 table_df = table_df.drop(columns=['Video URL'])
-                st.markdown(table_df.to_html(escape=False, index=False, height=400), unsafe_allow_html=True)
+                st.markdown(table_df.to_html(escape=False, index=False), unsafe_allow_html=True)
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
