@@ -171,14 +171,14 @@ def main():
                 # gender_data = {}
                 # country_data = {}
 
-                for row in demographics_data['rows']:
-                    age_group, gender, country, percentage = row[0], row[1], row[2], row[3]
-                    if age_group != 'TOTAL':
-                        age_data[age_group] = age_data.get(age_group, 0) + percentage
-                    if gender != 'TOTAL':
-                        gender_data[gender] = gender_data.get(gender, 0) + percentage
-                    if country != 'TOTAL':
-                        country_data[country] = country_data.get(country, 0) + percentage
+                # for row in demographics_data['rows']:
+                #     age_group, gender, country, percentage = row[0], row[1], row[2], row[3]
+                #     if age_group != 'TOTAL':
+                #         age_data[age_group] = age_data.get(age_group, 0) + percentage
+                #     if gender != 'TOTAL':
+                #         gender_data[gender] = gender_data.get(gender, 0) + percentage
+                #     if country != 'TOTAL':
+                #         country_data[country] = country_data.get(country, 0) + percentage
 
                 # Most Recent and Most Popular Videos
                 st.markdown("<h2 class='section-header'>Featured Videos</h2>", unsafe_allow_html=True)
