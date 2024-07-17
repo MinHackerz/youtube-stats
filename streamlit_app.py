@@ -267,10 +267,9 @@ def main():
 
                 # Comprehensive Video Table
                 st.markdown("<h2 class='section-header'>Comprehensive Video Table</h2>", unsafe_allow_html=True)
-                table_df = videos_df.drop(columns=['Thumbnail URL'])
-                table_df['Title'] = table_df.apply(lambda row: f"<a href='{row['Video URL']}' target='_blank'>{row['Title']}</a>", axis=1)
-                table_df = table_df.drop(columns=['Video URL'])
+                table_df = videos_df.drop(columns=['Thumbnail URL', 'Video URL'])
                 st.dataframe(table_df)
+
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
