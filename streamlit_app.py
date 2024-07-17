@@ -63,10 +63,10 @@ def get_video_details(video_id):
     response = requests.get(url)
     return response.json()
 
-def get_channel_demographics(channel_id):
-    url = f'https://www.googleapis.com/youtube/v3/analytics/reports?ids=channel=={channel_id}&startDate=2006-01-01&endDate=2024-01-01&metrics=viewerPercentage&dimensions=ageGroup,gender,country&key={st.secrets["youtube_api_key"]}'
-    response = requests.get(url)
-    return response.json()
+# def get_channel_demographics(channel_id):
+#     url = f'https://www.googleapis.com/youtube/v3/analytics/reports?ids=channel=={channel_id}&startDate=2006-01-01&endDate=2024-01-01&metrics=viewerPercentage&dimensions=ageGroup,gender,country&key={st.secrets["youtube_api_key"]}'
+#     response = requests.get(url)
+#     return response.json()
 
 def main():
     st.set_page_config(layout="wide", page_title="YouTube Channel Statistics")
@@ -256,7 +256,7 @@ def main():
                 fig_metrics.update_traces(customdata=metrics_df[['Title', 'Video URL']])
                 st.plotly_chart(fig_metrics, use_container_width=True)
 
-                # Viewers by Country Map
+                # # Viewers by Country Map
                 # st.markdown("<h2 class='section-header'>Viewers by Country</h2>", unsafe_allow_html=True)
                 # country_data_df = pd.DataFrame(list(country_data.items()), columns=['Country', 'Percentage'])
                 # fig_map = px.choropleth(country_data_df, locations='Country', locationmode='country names', color='Percentage',
