@@ -63,10 +63,10 @@ def get_video_details(video_id):
     response = requests.get(url)
     return response.json()
 
-def get_channel_demographics(channel_id):
-    url = f'https://www.googleapis.com/youtube/v3/analytics/reports?ids=channel=={channel_id}&startDate=2006-01-01&endDate=2024-01-01&metrics=viewerPercentage&dimensions=ageGroup,gender,country&key={st.secrets["youtube_api_key"]}'
-    response = requests.get(url)
-    return response.json()
+# def get_channel_demographics(channel_id):
+#     url = f'https://www.googleapis.com/youtube/v3/analytics/reports?ids=channel=={channel_id}&startDate=2006-01-01&endDate=2024-01-01&metrics=viewerPercentage&dimensions=ageGroup,gender,country&key={st.secrets["youtube_api_key"]}'
+#     response = requests.get(url)
+#     return response.json()
 
 def main():
     st.set_page_config(layout="wide", page_title="YouTube Channel Statistics")
@@ -165,11 +165,11 @@ def main():
                 videos_df = pd.DataFrame(videos_data, columns=['Title', 'Duration', 'Views Count', 'Likes Count', 'Comments Count', 'Published Date', 'Thumbnail URL', 'Video URL'])
                 videos_df['Published Date'] = pd.to_datetime(videos_df['Published Date'])
 
-                # Fetch demographics_data
-                demographics_data = get_channel_demographics(channel_id)
-                age_data = {}
-                gender_data = {}
-                country_data = {}
+                # # Fetch demographics data
+                # demographics_data = get_channel_demographics(channel_id)
+                # age_data = {}
+                # gender_data = {}
+                # country_data = {}
 
                 for row in demographics_data['rows']:
                     age_group, gender, country, percentage = row[0], row[1], row[2], row[3]
@@ -218,19 +218,19 @@ def main():
                     fig_likes.update_xaxes(title_text='', ticktext=[f'<a href="{url}">{title}</a>' for title, url in zip(top_5_likes['Title'], top_5_likes['Video URL'])], tickvals=top_5_likes['Title'])
                     st.plotly_chart(fig_likes, use_container_width=True)
 
-                # User Demographics by Age and Gender
-                st.markdown("<h2 class='section-header'>User Demographics</h2>", unsafe_allow_html=True)
-                col1, col2 = st.columns(2)
+                # # User Demographics by Age and Gender
+                # st.markdown("<h2 class='section-header'>User Demographics</h2>", unsafe_allow_html=True)
+                # col1, col2 = st.columns(2)
 
-                with col1:
-                    age_data_df = pd.DataFrame(list(age_data.items()), columns=['Age Group', 'Percentage'])
-                    fig_age = px.pie(age_data_df, values='Percentage', names='Age Group', title='User Demographics by Age')
-                    st.plotly_chart(fig_age, use_container_width=True)
+                # with col1:
+                #     age_data_df = pd.DataFrame(list(age_data.items()), columns=['Age Group', 'Percentage'])
+                #     fig_age = px.pie(age_data_df, values='Percentage', names='Age Group', title='User Demographics by Age')
+                #     st.plotly_chart(fig_age, use_container_width=True)
 
-                with col2:
-                    gender_data_df = pd.DataFrame(list(gender_data.items()), columns=['Gender', 'Percentage'])
-                    fig_gender = px.pie(gender_data_df, values='Percentage', names='Gender', title='User Demographics by Gender')
-                    st.plotly_chart(fig_gender, use_container_width=True)
+                # with col2:
+                #     gender_data_df = pd.DataFrame(list(gender_data.items()), columns=['Gender', 'Percentage'])
+                #     fig_gender = px.pie(gender_data_df, values='Percentage', names='Gender', title='User Demographics by Gender')
+                #     st.plotly_chart(fig_gender, use_container_width=True)
 
                 # Video Performance by Time
                 st.markdown("<h2 class='section-header'>Video Performance by Time</h2>", unsafe_allow_html=True)
@@ -256,14 +256,14 @@ def main():
                 fig_metrics.update_traces(customdata=metrics_df[['Title', 'Video URL']])
                 st.plotly_chart(fig_metrics, use_container_width=True)
 
-                # Viewers by Country Map
-                st.markdown("<h2 class='section-header'>Viewers by Country</h2>", unsafe_allow_html=True)
-                country_data_df = pd.DataFrame(list(country_data.items()), columns=['Country', 'Percentage'])
-                fig_map = px.choropleth(country_data_df, locations='Country', locationmode='country names', color='Percentage',
-                                        title='Viewers by Country',
-                                        color_continuous_scale='Viridis')
-                fig_map.update_layout(height=600)
-                st.plotly_chart(fig_map, use_container_width=True)
+                # # Viewers by Country Map
+                # st.markdown("<h2 class='section-header'>Viewers by Country</h2>", unsafe_allow_html=True)
+                # country_data_df = pd.DataFrame(list(country_data.items()), columns=['Country', 'Percentage'])
+                # fig_map = px.choropleth(country_data_df, locations='Country', locationmode='country names', color='Percentage',
+                #                         title='Viewers by Country',
+                #                         color_continuous_scale='Viridis')
+                # fig_map.update_layout(height=600)
+                # st.plotly_chart(fig_map, use_container_width=True)
 
                 # Comprehensive Video Table
                 st.markdown("<h2 class='section-header'>Comprehensive Video Table</h2>", unsafe_allow_html=True)
