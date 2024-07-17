@@ -165,7 +165,7 @@ def main():
                 videos_df = pd.DataFrame(videos_data, columns=['Title', 'Duration', 'Views Count', 'Likes Count', 'Comments Count', 'Published Date', 'Thumbnail URL', 'Video URL'])
                 videos_df['Published Date'] = pd.to_datetime(videos_df['Published Date'])
 
-                Fetch demographics data
+                # Fetch demographics_data
                 demographics_data = get_channel_demographics(channel_id)
                 age_data = {}
                 gender_data = {}
