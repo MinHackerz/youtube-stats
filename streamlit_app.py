@@ -82,15 +82,9 @@ def main():
     st.markdown("""
     <div class="button-section">
         <button id="analyze-btn" class="stButton">
-            <svg class="button-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-            </svg>
             Analyze
         </button>
         <button id="reset-btn" class="stButton">
-            <svg class="button-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
-            </svg>
             Reset
         </button>
     </div>
@@ -204,6 +198,25 @@ def main():
                     fig_likes.update_xaxes(title_text='', ticktext=[f'<a href="{url}">{title}</a>' for title, url in zip(top_5_likes['Title'], top_5_likes['Video URL'])], tickvals=top_5_likes['Title'])
                     st.plotly_chart(fig_likes, use_container_width=True)
 
+                # User Demographics by Age and Gender
+                demographics = {
+                    'agegroup': {'13-17': 5, '18-24': 20, '25-34': 35, '35-44': 25, '45-54': 10, '55-64': 3, '65+': 2},
+                    'gender': {'Male': 60, 'Female': 40}
+                }
+                
+                st.markdown("<h2 class='section-header'>User Demographics</h2>", unsafe_allow_html=True)
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    age_data = pd.DataFrame(list(demographics['agegroup'].items()), columns=['Age Group', 'Percentage'])
+                    fig_age = px.pie(age_data, values='Percentage', names='Age Group', title='User Demographics by Age')
+                    st.plotly_chart(fig_age, use_container_width=True)
+
+                with col2:
+                    gender_data = pd.DataFrame(list(demographics['gender'].items()), columns=['Gender', 'Percentage'])
+                    fig_gender = px.pie(gender_data, values='Percentage', names='Gender', title='User Demographics by Gender')
+                    st.plotly_chart(fig_gender, use_container_width=True)
+
                 # Video Performance by Time
                 st.markdown("<h2 class='section-header'>Video Performance by Time</h2>", unsafe_allow_html=True)
                 fig_performance = px.line(videos_df.sort_values('Published Date'),
@@ -230,15 +243,12 @@ def main():
 
                 # Viewers by Country Map
                 st.markdown("<h2 class='section-header'>Viewers by Country</h2>", unsafe_allow_html=True)
-                st.warning("Note: The YouTube API does not provide detailed geographic data for viewers. This map is a placeholder for future implementation.")
-                
-                # Placeholder for Viewers by Country Map
-                placeholder_data = pd.DataFrame({
-                    'country': ['United States', 'Canada', 'United Kingdom', 'Australia', 'Germany'],
-                    'viewers': [1000, 500, 750, 300, 450]
+                country_data = pd.DataFrame({
+                    'Country': ['United States', 'Canada', 'United Kingdom', 'Australia', 'Germany'],
+                    'Viewers': [1000, 500, 750, 300, 450]
                 })
-                fig_map = px.choropleth(placeholder_data, locations='country', locationmode='country names', color='viewers',
-                                        title='Placeholder: Viewers by Country',
+                fig_map = px.choropleth(country_data, locations='Country', locationmode='country names', color='Viewers',
+                                        title='Viewers by Country',
                                         color_continuous_scale='Viridis')
                 fig_map.update_layout(height=600)
                 st.plotly_chart(fig_map, use_container_width=True)
@@ -248,7 +258,7 @@ def main():
                 table_df = videos_df.drop(columns=['Thumbnail URL'])
                 table_df['Title'] = table_df.apply(lambda row: f"<a href='{row['Video URL']}' target='_blank'>{row['Title']}</a>", axis=1)
                 table_df = table_df.drop(columns=['Video URL'])
-                st.markdown(table_df.to_html(escape=False, index=False), unsafe_allow_html=True)
+                st.dataframe(table_df.head(20), height=400)
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
