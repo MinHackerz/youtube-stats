@@ -170,18 +170,18 @@ def main():
                     st.plotly_chart(fig_likes, use_container_width=True)
 
                 # User Demographics by Age and Gender
-                st.markdown("<h2 class='section-header'>User Demographics</h2>", unsafe_allow_html=True)
-                col1, col2 = st.columns(2)
+                # st.markdown("<h2 class='section-header'>User Demographics</h2>", unsafe_allow_html=True)
+                # col1, col2 = st.columns(2)
 
                 # with col1:
                 #     age_demographics = videos_df['Age Group'].value_counts()
                 #     fig_age = px.pie(values=age_demographics.values, names=age_demographics.index, title='User Demographics by Age')
                 #     st.plotly_chart(fig_age, use_container_width=True)
 
-                with col2:
-                    gender_demographics = videos_df['Gender'].value_counts()
-                    fig_gender = px.pie(values=gender_demographics.values, names=gender_demographics.index, title='User Demographics by Gender')
-                    st.plotly_chart(fig_gender, use_container_width=True)
+                # with col2:
+                #     gender_demographics = videos_df['Gender'].value_counts()
+                #     fig_gender = px.pie(values=gender_demographics.values, names=gender_demographics.index, title='User Demographics by Gender')
+                #     st.plotly_chart(fig_gender, use_container_width=True)
 
                 # Viewers by Country
                 st.markdown("<h2 class='section-header'>Viewers by Country</h2>", unsafe_allow_html=True)
