@@ -95,9 +95,10 @@ def main():
     st.markdown("</div>", unsafe_allow_html=True)
 
     # Button section
-    col1, col2, col3 = st.columns([1, 0.1, 1])
-    with col3:
+    col1, col2 = st.columns(2)
+    with col1:
         analyze_button = st.button("Analyze", key="analyze", help="Click to analyze the channel")
+    with col2:
         reset_button = st.button("Reset", key="reset", help="Click to reset the input")
 
     if reset_button:
