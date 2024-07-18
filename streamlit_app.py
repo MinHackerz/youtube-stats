@@ -94,10 +94,13 @@ def main():
     channel_input = st.text_input("YouTube Channel Username or Link", value=st.session_state.channel_input, placeholder="Enter the YouTube channel username (e.g. @channelname) or link")
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # Button section
-    col1, col2 = st.columns(2) 
+    # Create columns for buttons
+    col1, col2, col3 = st.columns([2, 1, 1])
+    
     with col2:
         analyze_button = st.button("Analyze", key="analyze", help="Click to analyze the channel")
+    
+    with col3:
         reset_button = st.button("Reset", key="reset", help="Click to reset the input")
 
     if reset_button:
