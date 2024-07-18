@@ -3,12 +3,18 @@ body {
     font-family: 'Roboto', sans-serif;
     background-color: #f9f9f9;
     color: #333;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .stApp {
     max-width: 100%;
     margin: 0 auto;
     padding: 20px;
+    flex: 1 0 auto;
 }
 
 /* Header Styles */
@@ -34,7 +40,6 @@ body {
     background-color: #ffffff;
     padding: 20px;
     border-radius: 10px;
-/*     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); */
     margin-bottom: 10px;
 }
 
@@ -46,7 +51,7 @@ body {
     margin-bottom: 30px;
 }
 
-.stButton {
+.stButton > button {
     background-color: #ff0000;
     color: white;
     border: none;
@@ -56,7 +61,7 @@ body {
     transition: background-color 0.3s ease;
 }
 
-.stButton:hover {
+.stButton > button:hover {
     background-color: #cc0000;
 }
 
@@ -132,41 +137,41 @@ body {
 }
 
 /* Table Styles */
-table {
-    width: auto;
+.stDataFrame {
+    width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
-    background-color: #dce8fc;
+    background-color: #ffffff;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-th, td {
+.stDataFrame th, .stDataFrame td {
     padding: 12px;
     text-align: left;
     border-bottom: 1px solid #ddd;
 }
 
-th {
+.stDataFrame th {
     background-color: #f2f2f2;
     font-weight: bold;
 }
 
-tr:hover {
+.stDataFrame tr:hover {
     background-color: #f5f5f5;
 }
 
 /* Footer */
 .footer {
     text-align: center;
-    margin-top: 50px;
     padding: 20px;
     background-color: #edeef7;
     color: #020326;
     width: 100%;
-    position: sticky;
+    position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
+    z-index: 1000;
 }
 
 .footer a {
@@ -176,4 +181,28 @@ tr:hover {
 
 .footer a:hover {
     text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+    .stApp {
+        padding: 10px;
+    }
+
+    .title {
+        font-size: 2em;
+    }
+
+    .metric-box {
+        margin-bottom: 10px;
+    }
+
+    .section-header {
+        font-size: 1.5em;
+    }
+}
+
+/* Ensure content doesn't get hidden behind the fixed footer */
+.main {
+    padding-bottom: 80px; /* Adjust this value based on your footer height */
 }
