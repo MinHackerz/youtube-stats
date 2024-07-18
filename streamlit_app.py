@@ -95,11 +95,11 @@ def main():
     st.markdown("</div>", unsafe_allow_html=True)
 
     # Button section
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns([1, 0.1, 1])
     with col1:
-        analyze_button = st.button("Analyze")
-    with col2:
-        reset_button = st.button("Reset")
+        analyze_button = st.button("Analyze", key="analyze", help="Click to analyze the channel")
+    with col3:
+        reset_button = st.button("Reset", key="reset", help="Click to reset the input")
 
     if reset_button:
         st.session_state.channel_input = ''
@@ -122,7 +122,7 @@ def main():
                 subscribers = int(channel_details['items'][0]['statistics']['subscriberCount'])
                 total_views = int(channel_details['items'][0]['statistics']['viewCount'])
                 video_count = int(channel_details['items'][0]['statistics']['videoCount'])
-                channel_created_on = datetime.strptime(channel_details['items'][0]['snippet']['publishedAt'], "%Y-%m-%dT%H:%M:%SZ").strftime("%B %d, %Y")
+                channel_created_on = datetime.strptime(channel_details['items'][0]['snippet']['publishedAt'], "%Y-%m-%dT%H:%M:%S%z").strftime("%B %d, %Y")
 
                 # Display Channel Overview
                 st.markdown("<h2 class='section-header'>Channel Overview</h2>", unsafe_allow_html=True)
@@ -135,7 +135,7 @@ def main():
 
                 # Create DataFrame for videos data
                 videos_df = pd.DataFrame(videos_data, columns=['Title', 'Duration', 'Views Count', 'Likes Count', 'Comments Count', 'Published Date', 'Thumbnail URL', 'Video URL'])
-                videos_df['Published Date'] = pd.to_datetime(videos_df['Published Date'])
+                videos_df['Published Date'] = pd.to_datetime(videos_df['Published Date'], format='%Y-%m-%dT%H:%M:%S%z')
 
                 # Most Recent and Most Popular Videos
                 st.markdown("<h2 class='section-header'>Featured Videos</h2>", unsafe_allow_html=True)
