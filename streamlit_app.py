@@ -42,7 +42,7 @@ def get_channel_and_video_data(channel_id):
     channel_data = response.json()
 
     uploads_playlist_id = channel_data['items'][0]['contentDetails']['relatedPlaylists']['uploads']
-    
+
     videos = []
     next_page_token = None
     while True:
@@ -51,12 +51,12 @@ def get_channel_and_video_data(channel_id):
             playlist_url += f'&pageToken={next_page_token}'
         playlist_response = requests.get(playlist_url)
         playlist_data = playlist_response.json()
-        
+
         video_ids = ','.join([item['contentDetails']['videoId'] for item in playlist_data['items']])
         videos_url = f'https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id={video_ids}&key={st.secrets["youtube_api_key"]}'
         videos_response = requests.get(videos_url)
         videos_data = videos_response.json()
-        
+
         for video in videos_data['items']:
             video_id = video['id']
             video_title = video['snippet']['title']
@@ -68,11 +68,11 @@ def get_channel_and_video_data(channel_id):
             thumbnail_url = video['snippet']['thumbnails']['medium']['url']
             video_url = f"https://www.youtube.com/watch?v={video_id}"
             videos.append([video_title, duration, view_count, like_count, comment_count, video_published_at, thumbnail_url, video_url])
-        
+
         next_page_token = playlist_data.get('nextPageToken')
         if not next_page_token:
             break
-    
+
     return channel_data, videos
 
 def main():
@@ -95,7 +95,7 @@ def main():
     st.markdown("</div>", unsafe_allow_html=True)
 
     # Button section
-    col1, col2, col3 = st.columns([1, 0.1, 1])
+    col1, col2, col3 = st.columns([1, 0.05, 1])
     with col1:
         analyze_button = st.button("Analyze", key="analyze", help="Click to analyze the channel")
     with col3:
@@ -103,7 +103,7 @@ def main():
 
     if reset_button:
         st.session_state.channel_input = ''
-        st.experimental_rerun()
+        st.rerun()
 
     if analyze_button and channel_input:
         st.session_state.channel_input = channel_input
@@ -185,6 +185,17 @@ def main():
                 fig_performance.update_traces(hovertemplate='<b>%{customdata[0]}</b><br>Date: %{x}<br>Views: %{y:,}<br><a href="%{customdata[1]}">Watch Video</a>')
                 fig_performance.update_traces(customdata=videos_df[['Title', 'Video URL']])
                 st.plotly_chart(fig_performance, use_container_width=True)
+
+                # Video Upload Frequency Bar Chart
+                st.markdown("<h2 class='section-header'>Video Upload Frequency</h2>", unsafe_allow_html=True)
+                videos_df['Month'] = videos_df['Published Date'].dt.month
+                video_upload_frequency = videos_df['Month'].value_counts().sort_index()
+                fig_upload_frequency = px.bar(video_upload_frequency, x=video_upload_frequency.index, y=video_upload_frequency.values,
+                                              labels={'x': 'Month', 'y': 'Number of Videos'},
+                                              title='Video Upload Frequency',
+                                              color_discrete_sequence=['#1f77b4'])
+                fig_upload_frequency.update_layout(height=600)
+                st.plotly_chart(fig_upload_frequency, use_container_width=True)
 
                 # Engagement Metrics over Time
                 st.markdown("<h2 class='section-header'>Engagement Metrics over Time</h2>", unsafe_allow_html=True)
