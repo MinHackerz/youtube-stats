@@ -96,7 +96,7 @@ def main():
 
     # Button section
     col1, col2, col3 = st.columns([1, 0.1, 1])
-    with col2:
+    with col3:
         analyze_button = st.button("Analyze", key="analyze", help="Click to analyze the channel")
         reset_button = st.button("Reset", key="reset", help="Click to reset the input")
 
