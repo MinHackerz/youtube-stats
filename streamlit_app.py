@@ -95,7 +95,7 @@ def main():
     st.markdown("</div>", unsafe_allow_html=True)
 
     # Create columns for buttons
-    col1, col2, col3 = st.columns([1.5, 0.4, 2])
+    col1, col2, col3 = st.columns([1.5, 0.35, 2])
     
     with col2:
         analyze_button = st.button("Analyze", key="analyze", help="Click to analyze the channel")
