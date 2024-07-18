@@ -85,9 +85,13 @@ def main():
     st.markdown('<div class="logo-container"><img src="https://igtoolsapk.in/wp-content/uploads/2024/07/Youtube-Statistics-Logo-New.png" alt="YouTube Statistics Logo" class="logo"></div>', unsafe_allow_html=True)
     st.markdown('<h1 class="title">YouTube Channel Statistics</h1>', unsafe_allow_html=True)
 
+    # Initialize session state for channel input
+    if 'channel_input' not in st.session_state:
+        st.session_state.channel_input = ''
+
     # Input section
     st.markdown("<div class='input-section'>", unsafe_allow_html=True)
-    channel_input = st.text_input("YouTube Channel Username or Link", placeholder="Enter the YouTube channel username (e.g. @channelname) or link")
+    channel_input = st.text_input("YouTube Channel Username or Link", value=st.session_state.channel_input, placeholder="Enter the YouTube channel username (e.g. @channelname) or link")
     st.markdown("</div>", unsafe_allow_html=True)
 
     # Button section
@@ -98,10 +102,11 @@ def main():
         reset_button = st.button("Reset")
 
     if reset_button:
-        st.session_state.clear()
+        st.session_state.channel_input = ''
         st.experimental_rerun()
 
     if analyze_button and channel_input:
+        st.session_state.channel_input = channel_input
         try:
             with st.spinner("Analyzing channel data..."):
                 # Extract channel name from input
@@ -201,6 +206,7 @@ def main():
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
+            st.error("This could be due to an invalid channel name or API limitations. Please try again with a different channel or later.")
 
     # Footer
     st.markdown("""
