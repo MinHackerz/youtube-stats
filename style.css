@@ -46,23 +46,36 @@ body {
 /* Button Section */
 .button-section {
     display: flex;
-    justify-content: center;
-    gap: 20px;
+    justify-content: flex-end;
+    gap: 5px;
     margin-bottom: 30px;
 }
 
 .stButton > button {
-    background-color: #ff0000;
-    color: white;
-    border: none;
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
 
-.stButton > button:hover {
-    background-color: #cc0000;
+.stButton > button:first-child {
+    background-color: #4CAF50;  /* Green color for Analyze button */
+    color: white;
+    border: none;
+}
+
+.stButton > button:first-child:hover {
+    background-color: #45a049;
+}
+
+.stButton > button:last-child {
+    background-color: #f44336;  /* Red color for Reset button */
+    color: white;
+    border: none;
+}
+
+.stButton > button:last-child:hover {
+    background-color: #da190b;
 }
 
 /* Metric Boxes */
@@ -188,15 +201,12 @@ body {
     .stApp {
         padding: 10px;
     }
-
     .title {
         font-size: 2em;
     }
-
     .metric-box {
         margin-bottom: 10px;
     }
-
     .section-header {
         font-size: 1.5em;
     }
