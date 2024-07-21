@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 from isodate import parse_duration
 import re
+import dateutil.parser
 
 # Custom CSS to improve the look and feel
 def local_css(file_name):
@@ -137,7 +138,7 @@ def main():
 
                 # Create DataFrame for videos data
                 videos_df = pd.DataFrame(videos_data, columns=['Title', 'Duration', 'Views Count', 'Likes Count', 'Comments Count', 'Published Date', 'Thumbnail URL', 'Video URL'])
-                videos_df['Published Date'] = pd.to_datetime(videos_df['Published Date'], format='%Y-%m-%dT%H:%M:%SZ')
+                videos_df['Published Date'] = videos_df['Published Date'].apply(dateutil.parser.parse)
 
 
                 # Most Recent and Most Popular Videos
@@ -189,14 +190,37 @@ def main():
                 fig_performance.update_traces(customdata=videos_df[['Title', 'Video URL']])
                 st.plotly_chart(fig_performance, use_container_width=True)
 
+                # # Video Upload Frequency Bar Chart
+                # st.markdown("<h2 class='section-header'>Video Upload Frequency</h2>", unsafe_allow_html=True)
+                # videos_df['Month'] = videos_df['Published Date'].dt.strftime('%b')
+                # video_upload_frequency = videos_df['Month'].value_counts().sort_index()
+                # fig_upload_frequency = px.bar(video_upload_frequency, x=video_upload_frequency.index, y=video_upload_frequency.values,
+                #                               labels={'x': 'Month', 'y': 'Number of Videos'},
+                #                               title='Video Upload Frequency',
+                #                               color_discrete_sequence=px.colors.qualitative.Plotly)
+                # fig_upload_frequency.update_layout(height=600)
+                # st.plotly_chart(fig_upload_frequency, use_container_width=True)
+
                 # Video Upload Frequency Bar Chart
                 st.markdown("<h2 class='section-header'>Video Upload Frequency</h2>", unsafe_allow_html=True)
+                
+                # Create a DataFrame with all 12 months
+                all_months = pd.DataFrame({'Month': pd.date_range(start='2021-01-01', end='2021-12-31', freq='MS').strftime('%b')})
+                
+                # Extract the month from 'Published Date' and count the number of videos in each month
                 videos_df['Month'] = videos_df['Published Date'].dt.strftime('%b')
-                video_upload_frequency = videos_df['Month'].value_counts().sort_index()
-                fig_upload_frequency = px.bar(video_upload_frequency, x=video_upload_frequency.index, y=video_upload_frequency.values,
+                video_upload_frequency = videos_df['Month'].value_counts().reset_index()
+                video_upload_frequency.columns = ['Month', 'Number of Videos']
+                
+                # Merge the DataFrame with all 12 months with the video upload frequency DataFrame
+                video_upload_frequency = pd.merge(all_months, video_upload_frequency, on='Month', how='left').fillna(0)
+                
+                # Create the bar chart
+                fig_upload_frequency = px.bar(video_upload_frequency, x='Month', y='Number of Videos',
                                               labels={'x': 'Month', 'y': 'Number of Videos'},
                                               title='Video Upload Frequency',
-                                              color_discrete_sequence=px.colors.qualitative.Plotly)
+                                              color='Number of Videos',
+                                              color_continuous_scale=px.colors.sequential.Plasma)
                 fig_upload_frequency.update_layout(height=600)
                 st.plotly_chart(fig_upload_frequency, use_container_width=True)
 
