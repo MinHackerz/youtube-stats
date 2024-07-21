@@ -1,7 +1,14 @@
-/* Global Styles */
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --accent-color: #ffc107;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+}
+
 body {
     font-family: 'Roboto', sans-serif;
-    background-color: #f9f9f9;
+    background-color: var(--primary-color);
     color: #333;
     margin: 0;
     padding: 0;
@@ -10,210 +17,78 @@ body {
     flex-direction: column;
 }
 
-.stApp {
-    max-width: 100%;
-    margin: 0 auto;
-    padding: 20px;
-    flex: 1 0 auto;
-}
-
-/* Header Styles */
-.logo-container {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.logo {
-    width: 150px;
-    height: 150px;
-}
-
-.title {
-    font-size: 2.5em;
-    text-align: center;
-    color: #ff0000;
-    margin-bottom: 15px;
-}
-
-/* Input Section */
-.input-section {
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-}
-
-/* Button Section */
-.button-section {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 30px;
-}
-
-.stButton > button {
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin: 0 5px;
-}
-
 .stButton > button:first-child {
-    background-color: #4CAF50;  /* Green color for Analyze button */
+    background-color: var(--accent-color);
     color: white;
     border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
 }
 
 .stButton > button:first-child:hover {
-    background-color: #45a049;
+    background-color: var(--success-color);
 }
 
 .stButton > button:last-child {
-    background-color: #f44336;  /* Red color for Reset button */
+    background-color: var(--secondary-color);
     color: white;
     border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
 }
 
 .stButton > button:last-child:hover {
-    background-color: #cc0000;
+    background-color: var(--danger-color);
 }
 
-/* Metric Boxes */
 .metric-box {
-    background-color: #ffffff;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    text-align: center;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
 }
 
 .metric-box h3 {
-    font-size: 1em;
+    font-size: 18px;
+    font-weight: bold;
     margin-bottom: 10px;
-    color: #666;
+    color: var(--secondary-color);
 }
 
 .metric-box p {
-    font-size: 1.5em;
+    font-size: 24px;
     font-weight: bold;
-    color: #333;
+    color: var(--primary-color);
 }
 
-/* Section Headers */
 .section-header {
-    font-size: 1.8em;
-    color: #333;
-    margin-top: 40px;
+    font-size: 24px;
+    font-weight: bold;
     margin-bottom: 20px;
-    border-bottom: 2px solid #ff0000;
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--accent-color);
     padding-bottom: 10px;
 }
 
-/* Video Container */
-.video-container {
-    position: relative;
-    width: 100%;
-    padding-bottom: 56.25%; /* 16:9 aspect ratio */
-    margin-bottom: 10px;
-}
-
-.video-container img {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 10px;
-}
-
-.play-button {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 60px;
-    height: 60px;
-    background-color: rgba(255, 0, 0, 0.7);
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.play-button::after {
-    content: '';
-    width: 0;
-    height: 0;
-    border-top: 15px solid transparent;
-    border-bottom: 15px solid transparent;
-    border-left: 25px solid white;
-    margin-left: 5px;
-}
-
-/* Table Styles */
-.stDataFrame {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    background-color: #ffffff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.stDataFrame th, .stDataFrame td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-}
-
-.stDataFrame th {
-    background-color: #f2f2f2;
-    font-weight: bold;
-}
-
-.stDataFrame tr:hover {
-    background-color: #f5f5f5;
-}
-
-/* Footer */
 .footer {
-    text-align: center;
+    background-color: var(--secondary-color);
+    color: #fff;
     padding: 20px;
-    background-color: #edeef7;
-    color: #020326;
-    width: 100%;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
+    text-align: center;
+    font-size: 14px;
 }
 
 .footer a {
-    color: #ff0000;
+    color: var(--accent-color);
     text-decoration: none;
+    transition: color 0.3s ease;
 }
 
 .footer a:hover {
-    text-decoration: underline;
-}
-
-/* Responsive adjustments */
-@media screen and (max-width: 768px) {
-    .stApp {
-        padding: 10px;
-    }
-    .title {
-        font-size: 2em;
-    }
-    .metric-box {
-        margin-bottom: 10px;
-    }
-    .section-header {
-        font-size: 1.5em;
-    }
-}
-
-/* Ensure content doesn't get hidden behind the fixed footer */
-.main {
-    padding-bottom: 80px; /* Adjust this value based on your footer height */
+    color: var(--primary-color);
 }
