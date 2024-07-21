@@ -240,20 +240,22 @@ def main():
                 # Engagement Metrics over Time
                 st.markdown("<h2 class='section-header'>Engagement Metrics over Time</h2>", unsafe_allow_html=True)
                 metrics_df = videos_df[['Published Date', 'Views Count', 'Likes Count', 'Comments Count', 'Title', 'Video URL']]
-                metrics_df = metrics_df.sort_values('Published Date')
+                metrics_df['Year'] = metrics_df['Published Date'].dt.year
                 
-                # Create a line chart for each metric
+                # Group the data by year and calculate the sum of each metric
+                grouped_metrics_df = metrics_df.groupby('Year').sum().reset_index()
+                
+                # Create a grouped bar chart for each metric
                 fig_metrics = go.Figure()
-                fig_metrics.add_trace(go.Scatter(x=metrics_df['Published Date'], y=metrics_df['Views Count'], mode='lines', name='Views'))
-                fig_metrics.add_trace(go.Scatter(x=metrics_df['Published Date'], y=metrics_df['Likes Count'], mode='lines', name='Likes'))
-                fig_metrics.add_trace(go.Scatter(x=metrics_df['Published Date'], y=metrics_df['Comments Count'], mode='lines', name='Comments'))
+                fig_metrics.add_trace(go.Bar(x=grouped_metrics_df['Year'], y=grouped_metrics_df['Views Count'], name='Views', marker_color='#4CAF50'))
+                fig_metrics.add_trace(go.Bar(x=grouped_metrics_df['Year'], y=grouped_metrics_df['Likes Count'], name='Likes', marker_color='#2196F3'))
+                fig_metrics.add_trace(go.Bar(x=grouped_metrics_df['Year'], y=grouped_metrics_df['Comments Count'], name='Comments', marker_color='#FFC107'))
                 
                 # Update layout
-                fig_metrics.update_layout(title='Engagement Metrics over Time', xaxis_title='Published Date', yaxis_title='Count', height=600)
+                fig_metrics.update_layout(title='Engagement Metrics over Time', xaxis_title='Year', yaxis_title='Count', height=600, barmode='group')
                 
                 # Update hover template
-                fig_metrics.update_traces(hovertemplate='<b>%{customdata[0]}</b><br>Date: %{x}<br>%{y:,} %{name}<br><a href="%{customdata[1]}">Watch Video</a>')
-                fig_metrics.update_traces(customdata=metrics_df[['Title', 'Video URL']])
+                fig_metrics.update_traces(hovertemplate='%{y:,} %{name}<br>Year: %{x}')
                 
                 # Show the chart
                 st.plotly_chart(fig_metrics, use_container_width=True)
