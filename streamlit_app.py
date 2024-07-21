@@ -99,7 +99,7 @@ def main():
     col1, col2, col3 = st.columns([1.5, 0.32, 2])
     
     with col2:
-        analyze_button = st.button("Analyze", key="analyze", help="Click to analyze the channel")
+        analyze_button = st.button("Analyze ðŸ”Ž", key="analyze", help="Click to analyze the channel")
     
     with col3:
         reset_button = st.button("Reset", key="reset", help="Click to reset the input")
