@@ -242,6 +242,9 @@ def main():
                 metrics_df = videos_df[['Published Date', 'Views Count', 'Likes Count', 'Comments Count', 'Title', 'Video URL']]
                 metrics_df['Year'] = metrics_df['Published Date'].dt.year
                 
+                # Remove the 'Published Date' column from the DataFrame
+                metrics_df = metrics_df.drop(columns=['Published Date'])
+                
                 # Group the data by year and calculate the sum of each metric
                 grouped_metrics_df = metrics_df.groupby('Year').sum().reset_index()
                 
