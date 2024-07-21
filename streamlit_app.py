@@ -84,7 +84,7 @@ def main():
 
     # Page header with logo
     st.markdown('<div class="logo-container"><img src="https://igtoolsapk.in/wp-content/uploads/2024/07/Youtube-Statistics-Logo-New.png" alt="YouTube Statistics Logo" class="logo"></div>', unsafe_allow_html=True)
-    st.markdown('<h1 class="title">YouTube Channel Statistics</h1>', unsafe_allow_html=True)
+    st.markdown("<h1 class='title' title='Get detailed statistics about your favorite YouTube channels'>YouTube Channel Statistics</h1>", unsafe_allow_html=True)
 
     # Initialize session state for channel input
     if 'channel_input' not in st.session_state:
@@ -99,7 +99,7 @@ def main():
     col1, col2, col3 = st.columns([1.5, 0.32, 2])
     
     with col2:
-        analyze_button = st.button("Analyze ðŸ”Ž", key="analyze", help="Click to analyze the channel")
+        analyze_button = st.button("Analyze", key="analyze", help="Click to analyze the channel")
     
     with col3:
         reset_button = st.button("Reset", key="reset", help="Click to reset the input")
