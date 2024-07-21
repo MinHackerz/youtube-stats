@@ -248,14 +248,17 @@ def main():
                 # Group the data by year and calculate the sum of each metric
                 grouped_metrics_df = metrics_df.groupby('Year').sum().reset_index()
                 
-                # Create a grouped bar chart for each metric
+                # Create a stacked column chart for each metric
                 fig_metrics = go.Figure()
                 fig_metrics.add_trace(go.Bar(x=grouped_metrics_df['Year'], y=grouped_metrics_df['Views Count'], name='Views', marker_color='#4CAF50'))
                 fig_metrics.add_trace(go.Bar(x=grouped_metrics_df['Year'], y=grouped_metrics_df['Likes Count'], name='Likes', marker_color='#2196F3'))
                 fig_metrics.add_trace(go.Bar(x=grouped_metrics_df['Year'], y=grouped_metrics_df['Comments Count'], name='Comments', marker_color='#FFC107'))
                 
+                # Add text labels to the stacked columns
+                fig_metrics.update_traces(texttemplate='%{y:,}', textposition='inside')
+                
                 # Update layout
-                fig_metrics.update_layout(title='Engagement Metrics over Time', xaxis_title='Year', yaxis_title='Count', height=600, barmode='group')
+                fig_metrics.update_layout(title='Engagement Metrics over Time', xaxis_title='Year', yaxis_title='Count', height=600, barmode='stack')
                 
                 # Update hover template
                 fig_metrics.update_traces(hovertemplate='%{y:,} %{name}<br>Year: %{x}')
