@@ -248,17 +248,17 @@ def main():
                 # Group the data by year and calculate the sum of each metric
                 grouped_metrics_df = metrics_df.groupby('Year').sum().reset_index()
                 
-                # Create a stacked column chart for each metric
+                # Create a pyramid stacked bar chart for each metric
                 fig_metrics = go.Figure()
-                fig_metrics.add_trace(go.Bar(x=grouped_metrics_df['Year'], y=grouped_metrics_df['Views Count'], name='Views', marker_color='#4CAF50'))
-                fig_metrics.add_trace(go.Bar(x=grouped_metrics_df['Year'], y=grouped_metrics_df['Likes Count'], name='Likes', marker_color='#2196F3'))
-                fig_metrics.add_trace(go.Bar(x=grouped_metrics_df['Year'], y=grouped_metrics_df['Comments Count'], name='Comments', marker_color='#FFC107'))
+                fig_metrics.add_trace(go.Bar(x=grouped_metrics_df['Year'], y=grouped_metrics_df['Views Count'], name='Views', marker_color='#4CAF50', orientation='v'))
+                fig_metrics.add_trace(go.Bar(x=grouped_metrics_df['Year'], y=grouped_metrics_df['Likes Count'], name='Likes', marker_color='#2196F3', orientation='v', base=grouped_metrics_df['Views Count']))
+                fig_metrics.add_trace(go.Bar(x=grouped_metrics_df['Year'], y=grouped_metrics_df['Comments Count'], name='Comments', marker_color='#FFC107', orientation='v', base=grouped_metrics_df['Views Count'] + grouped_metrics_df['Likes Count']))
                 
-                # Add text labels to the stacked columns
+                # Add text labels to the stacked bars
                 fig_metrics.update_traces(texttemplate='%{y:,}', textposition='inside')
                 
                 # Update layout
-                fig_metrics.update_layout(title='Engagement Metrics over Time', xaxis_title='Year', yaxis_title='Count', height=600, barmode='stack')
+                fig_metrics.update_layout(title='Engagement Metrics over Time', xaxis_title='Year', yaxis_title='Count', height=600, barmode='stack', yaxis_range=[0, grouped_metrics_df[['Views Count', 'Likes Count', 'Comments Count']].sum(axis=1).max()])
                 
                 # Update hover template
                 fig_metrics.update_traces(hovertemplate='%{y:,} %{name}<br>Year: %{x}')
