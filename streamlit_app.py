@@ -137,7 +137,8 @@ def main():
 
                 # Create DataFrame for videos data
                 videos_df = pd.DataFrame(videos_data, columns=['Title', 'Duration', 'Views Count', 'Likes Count', 'Comments Count', 'Published Date', 'Thumbnail URL', 'Video URL'])
-                videos_df['Published Date'] = pd.to_datetime(videos_df['Published Date'], format='%Y-%m-%dT%H:%M:%S%z')
+                videos_df['Published Date'] = pd.to_datetime(videos_df['Published Date'], format='%Y-%m-%dT%H:%M:%SZ')
+
 
                 # Most Recent and Most Popular Videos
                 st.markdown("<h2 class='section-header'>Featured Videos</h2>", unsafe_allow_html=True)
@@ -190,12 +191,12 @@ def main():
 
                 # Video Upload Frequency Bar Chart
                 st.markdown("<h2 class='section-header'>Video Upload Frequency</h2>", unsafe_allow_html=True)
-                videos_df['Month'] = videos_df['Published Date'].dt.month
+                videos_df['Month'] = videos_df['Published Date'].dt.strftime('%b')
                 video_upload_frequency = videos_df['Month'].value_counts().sort_index()
                 fig_upload_frequency = px.bar(video_upload_frequency, x=video_upload_frequency.index, y=video_upload_frequency.values,
                                               labels={'x': 'Month', 'y': 'Number of Videos'},
                                               title='Video Upload Frequency',
-                                              color_discrete_sequence=['#1f77b4'])
+                                              color_discrete_sequence=px.colors.qualitative.Plotly)
                 fig_upload_frequency.update_layout(height=600)
                 st.plotly_chart(fig_upload_frequency, use_container_width=True)
 
