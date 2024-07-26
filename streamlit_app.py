@@ -125,7 +125,18 @@ def main():
                 subscribers = int(channel_details['items'][0]['statistics']['subscriberCount'])
                 total_views = int(channel_details['items'][0]['statistics']['viewCount'])
                 video_count = int(channel_details['items'][0]['statistics']['videoCount'])
-                channel_created_on = datetime.strptime(channel_details['items'][0]['snippet']['publishedAt'], "%Y-%m-%dT%H:%M:%S.%fZ").strftime("%B %d, %Y")
+                channel_created_on = None
+                for fmt in ('%Y-%m-%dT%H:%M:%S.%fZ', '%Y-%m-%dT%H:%M:%SZ'):
+                    try:
+                        channel_created_on = datetime.strptime(channel_details['items'][0]['snippet']['publishedAt'], fmt)
+                        break
+                    except ValueError:
+                        pass
+                
+                if channel_created_on is not None:
+                    channel_created_on = channel_created_on.strftime("%B %d, %Y")
+                else:
+                    raise ValueError(f'No valid date format found for {channel_details["items"][0]["snippet"]["publishedAt"]}')
 
                 # Display Channel Overview
                 st.markdown("<h2 class='section-header'>Channel Overview</h2>", unsafe_allow_html=True)
