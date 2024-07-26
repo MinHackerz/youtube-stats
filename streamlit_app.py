@@ -122,7 +122,7 @@ def main():
                 channel_details, videos_data = get_channel_and_video_data(channel_id)
 
                 channel_title = channel_details['items'][0]['snippet']['title']
-		subscribers = int(channel_details['items'][0]['statistics']['subscriberCount'])
+                subscribers = int(channel_details['items'][0]['statistics']['subscriberCount'])
 		total_views = int(channel_details['items'][0]['statistics']['viewCount'])
 		video_count = int(channel_details['items'][0]['statistics']['videoCount'])
 		channel_created_on = None
