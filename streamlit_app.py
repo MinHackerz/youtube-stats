@@ -9,8 +9,6 @@ import plotly.express as px
 from isodate import parse_duration
 import re
 import dateutil.parser
-import folium
-from pygal.style import Style
 
 # Custom CSS to improve the look and feel
 def local_css(file_name):
@@ -150,41 +148,6 @@ def main():
                 # Get analytics data
                 analytics_data = get_analytics_data(channel_id)
 
-                # Visitor Demographics by Gender (Pie Chart)
-                gender_data = [item for item in analytics_data['rows'] if item[0] != 'UNKNOWN']
-                gender_df = pd.DataFrame(gender_data, columns=['Gender', 'Views', 'Likes', 'Dislikes', 'Shares', 'Estimated Minutes Watched'])
-                fig_gender = px.pie(gender_df, values='Views', names='Gender', title='Visitor Demographics by Gender')
-                fig_gender.update_traces(textposition='inside', textinfo='percent+label')
-
-                # Visitor Demographics by Age (Donut Chart)
-                age_data = [item for item in analytics_data['rows'] if item[1] != 'UNKNOWN']
-                age_df = pd.DataFrame(age_data, columns=['Gender', 'Age Group', 'Views', 'Likes', 'Dislikes', 'Shares', 'Estimated Minutes Watched'])
-                fig_age = px.pie(age_df, values='Views', names='Age Group', title='Visitor Demographics by Age', hole=0.3)
-                fig_age.update_traces(textposition='inside', textinfo='percent+label')
-
-                # Map Chart (showing visitor density from across the world) with legends
-                country_data = [item for item in analytics_data['rows'] if item[2] != 'UNKNOWN']
-                country_df = pd.DataFrame(country_data, columns=['Gender', 'Age Group', 'Country', 'Views', 'Likes', 'Dislikes', 'Shares', 'Estimated Minutes Watched'])
-                
-                # Create a map centered around the world
-                world_map = folium.Map(location=[0, 0], zoom_start=2)
-                
-                # Add a choropleth layer to the map
-                folium.Choropleth(
-                    geo_data='https://raw.githubusercontent.com/python-visualization/folium/master/examples/data/world-countries.json',
-                    data=country_df,
-                    columns=['Country', 'Views'],
-                    key_on='feature.properties.name',
-                    fill_color='YlGnBu',
-                    fill_opacity=0.7,
-                    line_opacity=0.2,
-                    legend_name='Views'
-                ).add_to(world_map)
-                
-                # Display the map
-                st.markdown("<h2 class='section-header'>Visitor Density Map</h2>", unsafe_allow_html=True)
-                st.write(world_map)
-
                 # Display Channel Overview
                 st.markdown("<h2 class='section-header'>Channel Overview</h2>", unsafe_allow_html=True)
                 col1, col2, col3, col4, col5 = st.columns(5)
@@ -197,17 +160,6 @@ def main():
                 # Create DataFrame for videos data
                 videos_df = pd.DataFrame(videos_data, columns=['Title', 'Duration', 'Views Count', 'Likes Count', 'Comments Count', 'Published Date', 'Thumbnail URL', 'Video URL'])
                 videos_df['Published Date'] = videos_df['Published Date'].apply(dateutil.parser.parse)
-
-                # Display the reports
-                st.markdown("<h2 class='section-header'>Visitor Demographics</h2>", unsafe_allow_html=True)
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.plotly_chart(fig_gender, use_container_width=True)
-                with col2:
-                    st.plotly_chart(fig_age, use_container_width=True)
-
-                st.markdown("<h2 class='section-header'>Visitor Density Map</h2>", unsafe_allow_html=True)
-                st.write(worldmap_chart.render_data_uri())
 
                 # Most Recent and Most Popular Videos
                 st.markdown("<h2 class='section-header'>Featured Videos</h2>", unsafe_allow_html=True)
@@ -225,38 +177,25 @@ def main():
                     st.markdown(f"<div class='video-container'><a href='{most_popular['Video URL']}' target='_blank'><img src='{most_popular['Thumbnail URL']}' alt='Most Popular Video Thumbnail'><div class='play-button'></div></a></div>", unsafe_allow_html=True)
                     st.markdown(f"<p><a href='{most_popular['Video URL']}' target='_blank'>{most_popular['Title']}</a></p>", unsafe_allow_html=True)
 
-                # Top 5 Videos by Views and Top 5 Liked Videos
-                st.markdown("<h2 class='section-header'>Top 5 Videos</h2>", unsafe_allow_html=True)
+                # Visitor Demographics by Gender (Pie Chart)
+                gender_data = [item for item in analytics_data['rows'] if item[0] != 'UNKNOWN']
+                gender_df = pd.DataFrame(gender_data, columns=['Gender', 'Views', 'Likes', 'Dislikes', 'Shares', 'Estimated Minutes Watched'])
+                fig_gender = px.pie(gender_df, values='Views', names='Gender', title='Visitor Demographics by Gender')
+                fig_gender.update_traces(textposition='inside', textinfo='percent+label')
+
+                # Visitor Demographics by Age (Donut Chart)
+                age_data = [item for item in analytics_data['rows'] if item[1] != 'UNKNOWN']
+                age_df = pd.DataFrame(age_data, columns=['Gender', 'Age Group', 'Views', 'Likes', 'Dislikes', 'Shares', 'Estimated Minutes Watched'])
+                fig_age = px.pie(age_df, values='Views', names='Age Group', title='Visitor Demographics by Age', hole=0.3)
+                fig_age.update_traces(textposition='inside', textinfo='percent+label')
+
+                # Display the reports
+                st.markdown("<h2 class='section-header'>Visitor Demographics</h2>", unsafe_allow_html=True)
                 col1, col2 = st.columns(2)
-
                 with col1:
-                    top_5_views = videos_df.nlargest(5, 'Views Count')
-                    fig_views = px.bar(top_5_views, x='Title', y='Views Count', title='Top 5 Videos by Views')
-                    fig_views.update_layout(xaxis_tickangle=-45, height=500)
-                    fig_views.update_traces(marker_color='#4CAF50', hovertemplate='<b>%{x}</b><br>Views: %{y:,}<br><a href="%{customdata[0]}">Watch Video</a>')
-                    fig_views.update_traces(customdata=top_5_views[['Video URL']])
-                    fig_views.update_xaxes(title_text='', ticktext=[f'<a href="{url}">{title}</a>' for title, url in zip(top_5_views['Title'], top_5_views['Video URL'])], tickvals=top_5_views['Title'])
-                    st.plotly_chart(fig_views, use_container_width=True)
-
+                    st.plotly_chart(fig_gender, use_container_width=True)
                 with col2:
-                    top_5_likes = videos_df.nlargest(5, 'Likes Count')
-                    fig_likes = px.bar(top_5_likes, x='Title', y='Likes Count', title='Top 5 Liked Videos')
-                    fig_likes.update_layout(xaxis_tickangle=-45, height=500)
-                    fig_likes.update_traces(marker_color='#2196F3', hovertemplate='<b>%{x}</b><br>Likes: %{y:,}<br><a href="%{customdata[0]}">Watch Video</a>')
-                    fig_likes.update_traces(customdata=top_5_likes[['Video URL']])
-                    fig_likes.update_xaxes(title_text='', ticktext=[f'<a href="{url}">{title}</a>' for title, url in zip(top_5_likes['Title'], top_5_likes['Video URL'])], tickvals=top_5_likes['Title'])
-                    st.plotly_chart(fig_likes, use_container_width=True)
-
-                # Video Performance by Time
-                st.markdown("<h2 class='section-header'>Video Performance by Time</h2>", unsafe_allow_html=True)
-                fig_performance = px.line(videos_df.sort_values('Published Date'),
-                                          x='Published Date', y='Views Count',
-                                          hover_data=['Title'],
-                                          title='Video Performance by Time')
-                fig_performance.update_layout(height=600)
-                fig_performance.update_traces(hovertemplate='<b>%{customdata[0]}</b><br>Date: %{x}<br>Views: %{y:,}<br><a href="%{customdata[1]}">Watch Video</a>')
-                fig_performance.update_traces(customdata=videos_df[['Title', 'Video URL']])
-                st.plotly_chart(fig_performance, use_container_width=True)
+                    st.plotly_chart(fig_age, use_container_width=True)
 
                 # Video Upload Frequency Bar Chart
                 st.markdown("<h2 class='section-header'>Video Upload Frequency</h2>", unsafe_allow_html=True)
@@ -280,6 +219,17 @@ def main():
                                               color_continuous_scale=px.colors.sequential.Plasma)
                 fig_upload_frequency.update_layout(height=600)
                 st.plotly_chart(fig_upload_frequency, use_container_width=True)
+
+                # Video Performance over Time
+                st.markdown("<h2 class='section-header'>Video Performance over Time</h2>", unsafe_allow_html=True)
+                fig_performance = px.line(videos_df.sort_values('Published Date'),
+                                          x='Published Date', y='Views Count',
+                                          hover_data=['Title'],
+                                          title='Video Performance over Time')
+                fig_performance.update_layout(height=600)
+                fig_performance.update_traces(hovertemplate='<b>%{customdata[0]}</b><br>Date: %{x}<br>Views: %{y:,}<br><a href="%{customdata[1]}">Watch Video</a>')
+                fig_performance.update_traces(customdata=videos_df[['Title', 'Video URL']])
+                st.plotly_chart(fig_performance, use_container_width=True)
 
                 # Engagement Metrics over Time
                 st.markdown("<h2 class='section-header'>Engagement Metrics over Time</h2>", unsafe_allow_html=True)
@@ -306,6 +256,13 @@ def main():
 
                 # Show the chart
                 st.plotly_chart(fig_metrics, use_container_width=True)
+
+                # Visitor Frequency Around the World
+                st.markdown("<h2 class='section-header'>Audience Density</h2>", unsafe_allow_html=True)
+                country_data = [item for item in analytics_data['rows'] if item[2] != 'UNKNOWN']
+                country_df = pd.DataFrame(country_data, columns=['Gender', 'Age Group', 'Country', 'Views', 'Likes', 'Dislikes', 'Shares', 'Estimated Minutes Watched'])
+                fig_worldmap = px.choropleth(country_df, locations='Country', locationmode='country names', color='Views', title='Visitor Frequency Around the World')
+                st.plotly_chart(fig_worldmap, use_container_width=True)
 
                 # Comprehensive Video Table
                 st.markdown("<h2 class='section-header'>Comprehensive Video Table</h2>", unsafe_allow_html=True)
