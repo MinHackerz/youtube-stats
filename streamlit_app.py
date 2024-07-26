@@ -132,7 +132,6 @@ def main():
 				break
 			except ValueError:
 				pass
-
 		if channel_created_on is not None:
 			channel_created_on = channel_created_on.strftime("%B %d, %Y")
 		else:
