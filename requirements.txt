@@ -3,4 +3,3 @@ requests
 pandas
 plotly
 isodate
-paygal
