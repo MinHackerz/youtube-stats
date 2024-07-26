@@ -97,10 +97,10 @@ def main():
 
     # Create columns for buttons
     col1, col2, col3 = st.columns([1.5, 0.32, 2])
-    
+
     with col2:
         analyze_button = st.button("Analyze", key="analyze", help="Click to analyze the channel")
-    
+
     with col3:
         reset_button = st.button("Reset", key="reset", help="Click to reset the input")
 
@@ -121,12 +121,22 @@ def main():
                 # Step 2: Use the channel ID to get detailed channel information and video data
                 channel_details, videos_data = get_channel_and_video_data(channel_id)
 
-		channel_title = channel_details['items'][0]['snippet']['title']
+                channel_title = channel_details['items'][0]['snippet']['title']
                 subscribers = int(channel_details['items'][0]['statistics']['subscriberCount'])
                 total_views = int(channel_details['items'][0]['statistics']['viewCount'])
                 video_count = int(channel_details['items'][0]['statistics']['videoCount'])
-                channel_created_on = datetime.strptime(channel_details['items'][0]['snippet']['publishedAt'], "%Y-%m-%dT%H:%M:%S.%fZ").strftime("%B %d, %Y")
+                channel_created_on = None
+                for fmt in ('%Y-%m-%dT%H:%M:%S.%fZ', '%Y-%m-%dT%H:%M:%SZ'):
+                    try:
+                        channel_created_on = datetime.strptime(channel_details['items'][0]['snippet']['publishedAt'], fmt)
+                        break
+                    except ValueError:
+                        pass
 
+                if channel_created_on is not None:
+                    channel_created_on = channel_created_on.strftime("%B %d, %Y")
+                else:
+                    raise ValueError(f'No valid date format found for {channel_details["items"][0]["snippet"]["publishedAt"]}')
 
                 # Display Channel Overview
                 st.markdown("<h2 class='section-header'>Channel Overview</h2>", unsafe_allow_html=True)
@@ -140,11 +150,11 @@ def main():
                 # Create DataFrame for videos data
                 videos_df = pd.DataFrame(videos_data, columns=['Title', 'Duration', 'Views Count', 'Likes Count', 'Comments Count', 'Published Date', 'Thumbnail URL', 'Video URL'])
                 videos_df['Published Date'] = videos_df['Published Date'].apply(dateutil.parser.parse)
-                
+
                 # Most Recent and Most Popular Videos
                 st.markdown("<h2 class='section-header'>Featured Videos</h2>", unsafe_allow_html=True)
                 col1, col2 = st.columns(2)
-                
+
                 with col1:
                     most_recent = videos_df.iloc[0]
                     st.markdown("<h3>Most Recent Video</h3>", unsafe_allow_html=True)
@@ -157,7 +167,7 @@ def main():
                         </div>
                     """, unsafe_allow_html=True)
                     st.markdown(f"<p><a href='{most_recent['Video URL']}' target='_blank'>{most_recent['Title']}</a></p>", unsafe_allow_html=True)
-                
+
                 with col2:
                     most_popular = videos_df.nlargest(1, 'Views Count').iloc[0]
                     st.markdown("<h3>Most Popular Video</h3>", unsafe_allow_html=True)
@@ -206,18 +216,18 @@ def main():
 
                 # Video Upload Frequency Bar Chart
                 st.markdown("<h2 class='section-header'>Video Upload Frequency</h2>", unsafe_allow_html=True)
-                
+
                 # Create a DataFrame with all 12 months
                 all_months = pd.DataFrame({'Month': pd.date_range(start='2021-01-01', end='2021-12-31', freq='MS').strftime('%b')})
-                
+
                 # Extract the month from 'Published Date' and count the number of videos in each month
                 videos_df['Month'] = videos_df['Published Date'].dt.strftime('%b')
                 video_upload_frequency = videos_df['Month'].value_counts().reset_index()
                 video_upload_frequency.columns = ['Month', 'Number of Videos']
-                
+
                 # Merge the DataFrame with all 12 months with the video upload frequency DataFrame
                 video_upload_frequency = pd.merge(all_months, video_upload_frequency, on='Month', how='left').fillna(0)
-                
+
                 # Create the bar chart
                 fig_upload_frequency = px.bar(video_upload_frequency, x='Month', y='Number of Videos',
                                               labels={'x': 'Month', 'y': 'Number of Videos'},
@@ -231,32 +241,32 @@ def main():
                 st.markdown("<h2 class='section-header'>Engagement Metrics over Time</h2>", unsafe_allow_html=True)
                 metrics_df = videos_df[['Published Date', 'Views Count', 'Likes Count', 'Comments Count', 'Title', 'Video URL']]
                 metrics_df['Year'] = metrics_df['Published Date'].dt.year
-                
+
                 # Remove the 'Published Date' column from the DataFrame
                 metrics_df = metrics_df.drop(columns=['Published Date'])
-                
+
                 # Group the data by year and calculate the sum of each metric
                 grouped_metrics_df = metrics_df.groupby('Year').sum().reset_index()
-                
+
                 # Create a stacked area chart for each metric
                 fig_metrics = go.Figure()
                 fig_metrics.add_trace(go.Scatter(x=grouped_metrics_df['Year'], y=grouped_metrics_df['Views Count'], name='Views', fill='tozeroy', mode='none', stackgroup='one', marker_color='#4CAF50'))
                 fig_metrics.add_trace(go.Scatter(x=grouped_metrics_df['Year'], y=grouped_metrics_df['Likes Count'], name='Likes', fill='tonexty', mode='none', stackgroup='one', marker_color='#2196F3'))
                 fig_metrics.add_trace(go.Scatter(x=grouped_metrics_df['Year'], y=grouped_metrics_df['Comments Count'], name='Comments', fill='tonexty', mode='none', stackgroup='one', marker_color='#FFC107'))
-                
+
                 # Update layout
                 fig_metrics.update_layout(title='Engagement Metrics over Time', xaxis_title='Year', yaxis_title='Count', height=600)
-                
+
                 # Update hover template
                 fig_metrics.update_traces(hovertemplate='%{y:,} %{name}<br>Year: %{x}')
-                
+
                 # Show the chart
                 st.plotly_chart(fig_metrics, use_container_width=True)
 
                 # Comprehensive Video Table
                 st.markdown("<h2 class='section-header'>Comprehensive Video Table</h2>", unsafe_allow_html=True)
                 table_df = videos_df.drop(columns=['Thumbnail URL', 'Video URL'])
-                
+
                 # Apply CSS styles to the table
                 st.markdown("""
                 <style>
@@ -264,28 +274,27 @@ def main():
                     width: auto;
                     border-collapse: collapse;
                 }
-                
+
                 .dataframe th {
                     background-color: #4CAF50;
                     color: white;
                     padding: 12px;
                     text-align: left;
                 }
-                
+
                 .dataframe td {
                     border: 1px solid #ddd;
                     padding: 8px;
                 }
-                
+
                 .dataframe tr:nth-child(even) {
                     background-color: #f2f2f2;
                 }
                 </style>
                 """, unsafe_allow_html=True)
-                
+
                 # Display the table
                 st.dataframe(table_df)
-
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
