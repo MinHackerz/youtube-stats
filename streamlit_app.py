@@ -9,7 +9,7 @@ import plotly.express as px
 from isodate import parse_duration
 import re
 import dateutil.parser
-import pygal
+import folium
 from pygal.style import Style
 
 # Custom CSS to improve the look and feel
@@ -165,9 +165,25 @@ def main():
                 # Map Chart (showing visitor density from across the world) with legends
                 country_data = [item for item in analytics_data['rows'] if item[2] != 'UNKNOWN']
                 country_df = pd.DataFrame(country_data, columns=['Gender', 'Age Group', 'Country', 'Views', 'Likes', 'Dislikes', 'Shares', 'Estimated Minutes Watched'])
-                worldmap_chart = pygal.maps.world.World(style=Style(colors=('#E6E6FA', '#D8BFD8', '#DDA0DD', '#EE82EE', '#DA70D6', '#C71585', '#DB7093')))
-                for index, row in country_df.iterrows():
-                    worldmap_chart.add(row['Country'], [(row['Country'], row['Views'])])
+                
+                # Create a map centered around the world
+                world_map = folium.Map(location=[0, 0], zoom_start=2)
+                
+                # Add a choropleth layer to the map
+                folium.Choropleth(
+                    geo_data='https://raw.githubusercontent.com/python-visualization/folium/master/examples/data/world-countries.json',
+                    data=country_df,
+                    columns=['Country', 'Views'],
+                    key_on='feature.properties.name',
+                    fill_color='YlGnBu',
+                    fill_opacity=0.7,
+                    line_opacity=0.2,
+                    legend_name='Views'
+                ).add_to(world_map)
+                
+                # Display the map
+                st.markdown("<h2 class='section-header'>Visitor Density Map</h2>", unsafe_allow_html=True)
+                st.write(world_map)
 
                 # Display Channel Overview
                 st.markdown("<h2 class='section-header'>Channel Overview</h2>", unsafe_allow_html=True)
