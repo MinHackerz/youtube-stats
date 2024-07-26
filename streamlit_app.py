@@ -139,22 +139,35 @@ def main():
                 # Create DataFrame for videos data
                 videos_df = pd.DataFrame(videos_data, columns=['Title', 'Duration', 'Views Count', 'Likes Count', 'Comments Count', 'Published Date', 'Thumbnail URL', 'Video URL'])
                 videos_df['Published Date'] = videos_df['Published Date'].apply(dateutil.parser.parse)
-
-
+                
                 # Most Recent and Most Popular Videos
                 st.markdown("<h2 class='section-header'>Featured Videos</h2>", unsafe_allow_html=True)
                 col1, col2 = st.columns(2)
-
+                
                 with col1:
                     most_recent = videos_df.iloc[0]
                     st.markdown("<h3>Most Recent Video</h3>", unsafe_allow_html=True)
-                    st.markdown(f"<div class='video-container'><a href='{most_recent['Video URL']}' target='_blank'><img src='{most_recent['Thumbnail URL']}' alt='Most Recent Video Thumbnail'><div class='play-button'></div></a></div>", unsafe_allow_html=True)
+                    st.markdown(f"""
+                        <div class='video-container' style='width: 100%; height: 0; padding-bottom: 56.25%; position: relative;'>
+                            <a href='{most_recent['Video URL']}' target='_blank'>
+                                <img src='{most_recent['Thumbnail URL']}' alt='Most Recent Video Thumbnail' style='position: absolute; width: 100%; height: 100%; object-fit: cover;'>
+                                <div class='play-button' style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);'></div>
+                            </a>
+                        </div>
+                    """, unsafe_allow_html=True)
                     st.markdown(f"<p><a href='{most_recent['Video URL']}' target='_blank'>{most_recent['Title']}</a></p>", unsafe_allow_html=True)
-
+                
                 with col2:
                     most_popular = videos_df.nlargest(1, 'Views Count').iloc[0]
                     st.markdown("<h3>Most Popular Video</h3>", unsafe_allow_html=True)
-                    st.markdown(f"<div class='video-container'><a href='{most_popular['Video URL']}' target='_blank'><img src='{most_popular['Thumbnail URL']}' alt='Most Popular Video Thumbnail'><div class='play-button'></div></a></div>", unsafe_allow_html=True)
+                    st.markdown(f"""
+                        <div class='video-container' style='width: 100%; height: 0; padding-bottom: 56.25%; position: relative;'>
+                            <a href='{most_popular['Video URL']}' target='_blank'>
+                                <img src='{most_popular['Thumbnail URL']}' alt='Most Popular Video Thumbnail' style='position: absolute; width: 100%; height: 100%; object-fit: cover;'>
+                                <div class='play-button' style='position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);'></div>
+                            </a>
+                        </div>
+                    """, unsafe_allow_html=True)
                     st.markdown(f"<p><a href='{most_popular['Video URL']}' target='_blank'>{most_popular['Title']}</a></p>", unsafe_allow_html=True)
 
                 # Top 5 Videos by Views and Top 5 Liked Videos
