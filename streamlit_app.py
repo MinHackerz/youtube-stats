@@ -260,7 +260,7 @@ def main():
                 st.markdown("""
                 <style>
                 .dataframe {
-                    width: 100%;
+                    width: auto;
                     border-collapse: collapse;
                 }
                 
