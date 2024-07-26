@@ -123,9 +123,9 @@ def main():
 
                 channel_title = channel_details['items'][0]['snippet']['title']
                 subscribers = int(channel_details['items'][0]['statistics']['subscriberCount'])
-		total_views = int(channel_details['items'][0]['statistics']['viewCount'])
-		video_count = int(channel_details['items'][0]['statistics']['videoCount'])
-		channel_created_on = None
+                total_views = int(channel_details['items'][0]['statistics']['viewCount'])
+                video_count = int(channel_details['items'][0]['statistics']['videoCount'])
+                channel_created_on = None
 		for fmt in ('%Y-%m-%dT%H:%M:%S.%fZ', '%Y-%m-%dT%H:%M:%SZ'):
 		    try:
 		        channel_created_on = datetime.strptime(channel_details['items'][0]['snippet']['publishedAt'], fmt)
