@@ -74,19 +74,7 @@ def get_channel_and_video_data(channel_id):
         if not next_page_token:
             break
 
-    # New code for visitor demographics and geographic data
-    start_date = (datetime.now() - pd.DateOffset(months=1)).strftime('%Y-%m-%d')
-    end_date = datetime.now().strftime('%Y-%m-%d')
-
-    demographics_url = f'https://www.googleapis.com/youtube/analytics/v2/reports?ids=channel%3D%3D{channel_id}&startDate={start_date}&endDate={end_date}&metrics=viewerPercentage&dimensions=gender&key={st.secrets["youtube_api_key"]}'
-    demographics_response = requests.get(demographics_url)
-    demographics_data = demographics_response.json()
-
-    geographic_url = f'https://www.googleapis.com/youtube/analytics/v2/reports?ids=channel%3D%3D{channel_id}&startDate={start_date}&endDate={end_date}&metrics=viewerPercentage&dimensions=country&key={st.secrets["youtube_api_key"]}'
-    geographic_response = requests.get(geographic_url)
-    geographic_data = geographic_response.json()
-
-    return channel_data, videos_data, demographics_data, geographic_data
+    return channel_data, videos
 
 def main():
     st.set_page_config(layout="wide", page_title="YouTube Channel Statistics")
@@ -109,10 +97,10 @@ def main():
 
     # Create columns for buttons
     col1, col2, col3 = st.columns([1.5, 0.32, 2])
-
+    
     with col2:
         analyze_button = st.button("Analyze", key="analyze", help="Click to analyze the channel")
-
+    
     with col3:
         reset_button = st.button("Reset", key="reset", help="Click to reset the input")
 
@@ -131,7 +119,7 @@ def main():
                 channel_id = get_channel_id(channel_name)
 
                 # Step 2: Use the channel ID to get detailed channel information and video data
-                channel_details, videos_data, demographics_data, geographic_data = get_channel_and_video_data(channel_id)
+                channel_details, videos_data = get_channel_and_video_data(channel_id)
 
                 channel_title = channel_details['items'][0]['snippet']['title']
                 subscribers = int(channel_details['items'][0]['statistics']['subscriberCount'])
@@ -151,6 +139,7 @@ def main():
                 # Create DataFrame for videos data
                 videos_df = pd.DataFrame(videos_data, columns=['Title', 'Duration', 'Views Count', 'Likes Count', 'Comments Count', 'Published Date', 'Thumbnail URL', 'Video URL'])
                 videos_df['Published Date'] = videos_df['Published Date'].apply(dateutil.parser.parse)
+
 
                 # Most Recent and Most Popular Videos
                 st.markdown("<h2 class='section-header'>Featured Videos</h2>", unsafe_allow_html=True)
@@ -190,21 +179,7 @@ def main():
                     fig_likes.update_xaxes(title_text='', ticktext=[f'<a href="{url}">{title}</a>' for title, url in zip(top_5_likes['Title'], top_5_likes['Video URL'])], tickvals=top_5_likes['Title'])
                     st.plotly_chart(fig_likes, use_container_width=True)
 
-                # Visitor Demographics by Gender (Pie Chart)
-                st.markdown("<h2 class='section-header'>Visitor Demographics</h2>", unsafe_allow_html=True)
-                col1, col2 = st.columns(2)
-
-                with col1:
-                    gender_data = [{'gender': row['dimensions'][0], 'percentage': float(row['metrics'][0])} for row in demographics_data['rows']]
-                    fig_gender = px.pie(gender_data, values='percentage', names='gender', title='Visitor Demographics by Gender')
-                    st.plotly_chart(fig_gender, use_container_width=True)
-
-                # Visitor Demographics by Age (Donut Chart)
-                with col2:
-                    age_data = [{'age': row['dimensions'][0], 'percentage': float(row['metrics'][0])} for row in demographics_data['rows']]
-                    fig_age = px.pie(age_data, values='percentage', names='age', title='Visitor Demographics by Age', hole=0.4)
-                    st.plotly_chart(fig_age, use_container_width=True)
-                                # Video Performance by Time
+                # Video Performance by Time
                 st.markdown("<h2 class='section-header'>Video Performance by Time</h2>", unsafe_allow_html=True)
                 fig_performance = px.line(videos_df.sort_values('Published Date'),
                                           x='Published Date', y='Views Count',
@@ -214,17 +189,6 @@ def main():
                 fig_performance.update_traces(hovertemplate='<b>%{customdata[0]}</b><br>Date: %{x}<br>Views: %{y:,}<br><a href="%{customdata[1]}">Watch Video</a>')
                 fig_performance.update_traces(customdata=videos_df[['Title', 'Video URL']])
                 st.plotly_chart(fig_performance, use_container_width=True)
-
-                # # Video Upload Frequency Bar Chart
-                # st.markdown("<h2 class='section-header'>Video Upload Frequency</h2>", unsafe_allow_html=True)
-                # videos_df['Month'] = videos_df['Published Date'].dt.strftime('%b')
-                # video_upload_frequency = videos_df['Month'].value_counts().sort_index()
-                # fig_upload_frequency = px.bar(video_upload_frequency, x=video_upload_frequency.index, y=video_upload_frequency.values,
-                #                               labels={'x': 'Month', 'y': 'Number of Videos'},
-                #                               title='Video Upload Frequency',
-                #                               color_discrete_sequence=px.colors.qualitative.Plotly)
-                # fig_upload_frequency.update_layout(height=600)
-                # st.plotly_chart(fig_upload_frequency, use_container_width=True)
 
                 # Video Upload Frequency Bar Chart
                 st.markdown("<h2 class='section-header'>Video Upload Frequency</h2>", unsafe_allow_html=True)
@@ -248,19 +212,6 @@ def main():
                                               color_continuous_scale=px.colors.sequential.Plasma)
                 fig_upload_frequency.update_layout(height=600)
                 st.plotly_chart(fig_upload_frequency, use_container_width=True)
-
-                # # Engagement Metrics over Time
-                # st.markdown("<h2 class='section-header'>Engagement Metrics over Time</h2>", unsafe_allow_html=True)
-                # metrics_df = videos_df[['Published Date', 'Views Count', 'Likes Count', 'Comments Count', 'Title', 'Video URL']]
-                # metrics_df = metrics_df.sort_values('Published Date')
-                # fig_metrics = go.Figure()
-                # fig_metrics.add_trace(go.Scatter(x=metrics_df['Published Date'], y=metrics_df['Views Count'], mode='lines+markers', name='Views'))
-                # fig_metrics.add_trace(go.Scatter(x=metrics_df['Published Date'], y=metrics_df['Likes Count'], mode='lines+markers', name='Likes'))
-                # fig_metrics.add_trace(go.Scatter(x=metrics_df['Published Date'], y=metrics_df['Comments Count'], mode='lines+markers', name='Comments'))
-                # fig_metrics.update_layout(title='Engagement Metrics over Time', xaxis_title='Published Date', yaxis_title='Count', height=600)
-                # fig_metrics.update_traces(hovertemplate='<b>%{customdata[0]}</b><br>Date: %{x}<br>%{y:,} %{name}<br><a href="%{customdata[1]}">Watch Video</a>')
-                # fig_metrics.update_traces(customdata=metrics_df[['Title', 'Video URL']])
-                # st.plotly_chart(fig_metrics, use_container_width=True)
 
                 # Engagement Metrics over Time
                 st.markdown("<h2 class='section-header'>Engagement Metrics over Time</h2>", unsafe_allow_html=True)
@@ -288,12 +239,6 @@ def main():
                 # Show the chart
                 st.plotly_chart(fig_metrics, use_container_width=True)
 
-                # Visitor Density Map Chart
-                st.markdown("<h2 class='section-header'>Visitor Density</h2>", unsafe_allow_html=True)
-                geographic_data = [{'country': row['dimensions'][0], 'percentage': float(row['metrics'][0])} for row in geographic_data['rows']]
-                fig_density = px.choropleth(geographic_data, locations='country', locationmode='country names', color='percentage', title='Visitor Density', color_continuous_scale='Viridis')
-                fig_density.update_layout(height=600)
-                st.plotly_chart(fig_density, use_container_width=True)
 
                 # Comprehensive Video Table
                 st.markdown("<h2 class='section-header'>Comprehensive Video Table</h2>", unsafe_allow_html=True)
