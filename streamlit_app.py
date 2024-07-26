@@ -76,6 +76,13 @@ def get_channel_and_video_data(channel_id):
 
     return channel_data, videos
 
+# Function to get visitor demographics data from YouTube Analytics API
+def get_visitor_demographics(channel_id):
+    url = f"https://www.googleapis.com/youtube/analytics/v2/reports?ids=channel%3D%3D{channel_id}&startDate=2022-01-01&endDate=2022-12-31&metrics=viewerPercentage&dimensions=gender,ageGroup&key={st.secrets['youtube_api_key']}"
+    response = requests.get(url)
+    data = response.json()
+    return data
+
 def main():
     st.set_page_config(layout="wide", page_title="YouTube Channel Statistics")
 
@@ -120,6 +127,9 @@ def main():
 
                 # Step 2: Use the channel ID to get detailed channel information and video data
                 channel_details, videos_data = get_channel_and_video_data(channel_id)
+
+                # Get visitor demographics data from YouTube Analytics API
+                demographics_data = get_visitor_demographics(channel_id)
 
                 channel_title = channel_details['items'][0]['snippet']['title']
                 subscribers = int(channel_details['items'][0]['statistics']['subscriberCount'])
@@ -170,6 +180,27 @@ def main():
                     """, unsafe_allow_html=True)
                     st.markdown(f"<p><a href='{most_popular['Video URL']}' target='_blank'>{most_popular['Title']}</a></p>", unsafe_allow_html=True)
 
+                # Create DataFrame for demographics data
+                demographics_df = pd.DataFrame(demographics_data['rows'], columns=['dimensions', 'viewerPercentage'])
+                demographics_df[['gender', 'ageGroup']] = pd.DataFrame(demographics_df['dimensions'].tolist(), index=demographics_df.index)
+                demographics_df['viewerPercentage'] = demographics_df['viewerPercentage'].astype(float)
+
+                # Visitor Demographics Report
+                st.markdown("<h2 class='section-header'>Visitor Demographics</h2>", unsafe_allow_html=True)
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    # Visitors by Gender (Donut Chart)
+                    gender_data = demographics_df.groupby('gender')['viewerPercentage'].sum().reset_index()
+                    fig_gender = px.pie(gender_data, values='viewerPercentage', names='gender', title='Visitors by Gender', hole=0.4)
+                    st.plotly_chart(fig_gender, use_container_width=True)
+
+                with col2:
+                    # Visitors by Age (Pie Chart)
+                    age_data = demographics_df.groupby('ageGroup')['viewerPercentage'].sum().reset_index()
+                    fig_age = px.pie(age_data, values='viewerPercentage', names='ageGroup', title='Visitors by Age')
+                    st.plotly_chart(fig_age, use_container_width=True)
+                
                 # Top 5 Videos by Views and Top 5 Liked Videos
                 st.markdown("<h2 class='section-header'>Top 5 Videos</h2>", unsafe_allow_html=True)
                 col1, col2 = st.columns(2)
