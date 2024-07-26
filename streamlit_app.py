@@ -252,11 +252,39 @@ def main():
                 # Show the chart
                 st.plotly_chart(fig_metrics, use_container_width=True)
 
-
                 # Comprehensive Video Table
                 st.markdown("<h2 class='section-header'>Comprehensive Video Table</h2>", unsafe_allow_html=True)
                 table_df = videos_df.drop(columns=['Thumbnail URL', 'Video URL'])
+                
+                # Apply CSS styles to the table
+                st.markdown("""
+                <style>
+                .dataframe {
+                    width: 100%;
+                    border-collapse: collapse;
+                }
+                
+                .dataframe th {
+                    background-color: #4CAF50;
+                    color: white;
+                    padding: 12px;
+                    text-align: left;
+                }
+                
+                .dataframe td {
+                    border: 1px solid #ddd;
+                    padding: 8px;
+                }
+                
+                .dataframe tr:nth-child(even) {
+                    background-color: #f2f2f2;
+                }
+                </style>
+                """, unsafe_allow_html=True)
+                
+                # Display the table
                 st.dataframe(table_df)
+
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
