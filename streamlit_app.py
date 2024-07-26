@@ -78,11 +78,11 @@ def get_channel_and_video_data(channel_id):
     start_date = (datetime.now() - pd.DateOffset(months=1)).strftime('%Y-%m-%d')
     end_date = datetime.now().strftime('%Y-%m-%d')
 
-    demographics_url = f'https://www.googleapis.com/youtube/analytics/v2/reports?ids=channel%3D%3D{channel_id}&startDate={start_date}&endDate={end_date}&metrics=viewerPercentage&dimensions=gender&key={st.secrets["youtube_analytics_api_key"]}'
+    demographics_url = f'https://www.googleapis.com/youtube/analytics/v2/reports?ids=channel%3D%3D{channel_id}&startDate={start_date}&endDate={end_date}&metrics=viewerPercentage&dimensions=gender&key={st.secrets["youtube_api_key"]}'
     demographics_response = requests.get(demographics_url)
     demographics_data = demographics_response.json()
 
-    geographic_url = f'https://www.googleapis.com/youtube/analytics/v2/reports?ids=channel%3D%3D{channel_id}&startDate={start_date}&endDate={end_date}&metrics=viewerPercentage&dimensions=country&key={st.secrets["youtube_analytics_api_key"]}'
+    geographic_url = f'https://www.googleapis.com/youtube/analytics/v2/reports?ids=channel%3D%3D{channel_id}&startDate={start_date}&endDate={end_date}&metrics=viewerPercentage&dimensions=country&key={st.secrets["youtube_api_key"]}'
     geographic_response = requests.get(geographic_url)
     geographic_data = geographic_response.json()
 
