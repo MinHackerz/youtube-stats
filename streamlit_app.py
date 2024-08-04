@@ -131,8 +131,6 @@ def generate_response_with_gemini(prompt):
     else:
         raise Exception(f"Error generating response from Gemini API: {data}")
 
-
-
 def main():
     st.set_page_config(layout="wide", page_title="YouTube Channel Statistics")
 
@@ -384,7 +382,7 @@ def main():
                     st.markdown("</div>", unsafe_allow_html=True)
                     if st.button("Copy Suggestions", key="copy_suggestions"):
                         st.write("Suggestions copied to clipboard!")
-            st.text_area("Suggestions", suggestions, height=200)
+                        st.text_area("Suggestions", suggestions, height=200)
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
