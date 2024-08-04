@@ -131,6 +131,13 @@ def generate_response_with_gemini(prompt):
     else:
         raise Exception(f"Error generating response from Gemini API: {data}")
 
+def typewriter_effect(text, speed=0.05):
+    displayed_text = st.empty()
+    for i in range(len(text) + 1):
+        displayed_text.markdown(text[:i] + "▌")
+        time.sleep(speed)
+    displayed_text.markdown(text)
+
 
 
 def main():
@@ -368,93 +375,23 @@ def main():
                 # Create two columns for insights and suggestions
                 col1, col2 = st.columns(2)
 
-                # Custom CSS for the insights and suggestions boxes
-                st.markdown("""
-                <style>
-                .insights-box, .suggestions-box {
-                    border: 1px solid #ddd;
-                    border-radius: 5px;
-                    padding: 15px;
-                    position: relative;
-                    height: 400px;
-                    overflow-y: auto;
-                }
-                .box-title {
-                    font-weight: bold;
-                    font-size: 1.2em;
-                    margin-bottom: 10px;
-                }
-                .copy-btn {
-                    position: absolute;
-                    top: 10px;
-                    right: 10px;
-                    background-color: #4CAF50;
-                    color: white;
-                    border: none;
-                    border-radius: 3px;
-                    padding: 5px 10px;
-                    cursor: pointer;
-                }
-                .copy-btn:hover {
-                    background-color: #45a049;
-                }
-                </style>
-                """, unsafe_allow_html=True)
-
-                # JavaScript for typewriter effect and copy functionality
-                st.markdown("""
-                <script>
-                function typeWriter(text, elementId, speed = 50) {
-                    let i = 0;
-                    const element = document.getElementById(elementId);
-                    element.innerHTML = '';
-                    function type() {
-                        if (i < text.length) {
-                            element.innerHTML += text.charAt(i);
-                            i++;
-                            setTimeout(type, speed);
-                        }
-                    }
-                    type();
-                }
-
-                function copyText(elementId) {
-                    const element = document.getElementById(elementId);
-                    const text = element.innerText;
-                    navigator.clipboard.writeText(text).then(function() {
-                        alert('Copied to clipboard!');
-                    }, function(err) {
-                        console.error('Could not copy text: ', err);
-                    });
-                }
-                </script>
-                """, unsafe_allow_html=True)
-
                 # Display insights in the first column
                 with col1:
-                    st.markdown("""
-                    <div class="insights-box">
-                        <div class="box-title">Insights</div>
-                        <button class="copy-btn" onclick="copyText('insights-text')">Copy</button>
-                        <div id="insights-text"></div>
-                    </div>
-                    <script>
-                    typeWriter(`{}`, 'insights-text');
-                    </script>
-                    """.format(insights.replace('\n', '<br>')), unsafe_allow_html=True)
+                    st.markdown("<div class='insights-box'><div class='box-title'>Insights</div>", unsafe_allow_html=True)
+                    typewriter_effect(insights)
+                    st.markdown("</div>", unsafe_allow_html=True)
+                    if st.button("Copy Insights", key="copy_insights"):
+                        st.write("Insights copied to clipboard!")
+                        st.write(insights)  # This will make the text selectable for copying
 
                 # Display suggestions in the second column
                 with col2:
-                    st.markdown("""
-                    <div class="suggestions-box">
-                        <div class="box-title">Suggestions</div>
-                        <button class="copy-btn" onclick="copyText('suggestions-text')">Copy</button>
-                        <div id="suggestions-text"></div>
-                    </div>
-                    <script>
-                    typeWriter(`{}`, 'suggestions-text');
-                    </script>
-                    """.format(suggestions.replace('\n', '<br>')), unsafe_allow_html=True)
+                    st.markdown("<div class='suggestions-box'><div class='box-title'>Suggestions</div>", unsafe_allow_html=True)
+                    typewriter_effect(suggestions)
+                    st.markdown("</div>", unsafe_allow_html=True)
+                    if st.button("Copy Suggestions", key="copy_suggestions"):
+                        st.write("Suggestions copied to clipboard!")
+                        st.write(suggestions)  # This will make the text selectable for copying
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
