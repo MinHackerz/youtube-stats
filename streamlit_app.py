@@ -369,37 +369,39 @@ def main():
                 if 'suggestions' not in st.session_state:
                     st.session_state['suggestions'] = suggestions
             
-                # Create two columns for insights and suggestions
-                col1, col2 = st.columns(2)
-            
                 # JavaScript function to copy text to clipboard
                 copy_js = """
                 <script>
                 function copyToClipboard(text) {
-                    navigator.clipboard.writeText(text).then(function() {
-                        alert('Copied to clipboard');
-                    }, function(err) {
-                        alert('Failed to copy text: ', err);
-                    });
+                    const el = document.createElement('textarea');
+                    el.value = text;
+                    document.body.appendChild(el);
+                    el.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(el);
+                    alert('Copied to clipboard');
                 }
                 </script>
                 """
+            
+                st.markdown(copy_js, unsafe_allow_html=True)
+            
+                # Create two columns for insights and suggestions
+                col1, col2 = st.columns(2)
             
                 # Display insights in the first column
                 with col1:
                     st.markdown("<div class='insights-box'><div class='box-title'>Insights</div>", unsafe_allow_html=True)
                     st.markdown(st.session_state['insights'])
                     st.markdown("</div>", unsafe_allow_html=True)
-                    st.markdown(copy_js, unsafe_allow_html=True)
-                    st.button("Copy Insights", key="copy_insights", on_click=lambda: st.markdown(f"<script>copyToClipboard(`{st.session_state['insights']}`);</script>", unsafe_allow_html=True))
+                    st.button("Copy Insights", on_click=lambda: st.markdown(f"<script>copyToClipboard(`{st.session_state['insights']}`)</script>", unsafe_allow_html=True))
             
                 # Display suggestions in the second column
                 with col2:
                     st.markdown("<div class='suggestions-box'><div class='box-title'>Suggestions</div>", unsafe_allow_html=True)
                     st.markdown(st.session_state['suggestions'])
                     st.markdown("</div>", unsafe_allow_html=True)
-                    st.markdown(copy_js, unsafe_allow_html=True)
-                    st.button("Copy Suggestions", key="copy_suggestions", on_click=lambda: st.markdown(f"<script>copyToClipboard(`{st.session_state['suggestions']}`);</script>", unsafe_allow_html=True))
+                    st.button("Copy Suggestions", on_click=lambda: st.markdown(f"<script>copyToClipboard(`{st.session_state['suggestions']}`)</script>", unsafe_allow_html=True))
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
