@@ -76,6 +76,63 @@ def get_channel_and_video_data(channel_id):
 
     return channel_data, videos
 
+def generate_insights_and_suggestions(channel_title, subscribers, total_views, video_count, channel_created_on, videos_df):
+    prompt = f"""
+    Analyze the following YouTube channel statistics and provide insights and suggestions for better engagement:
+
+    Channel Name: {channel_title}
+    Subscribers: {subscribers:,}
+    Total Views: {total_views:,}
+    Video Count: {video_count:,}
+    Channel Created On: {channel_created_on}
+
+    Top 5 Videos by Views:
+    {videos_df.nlargest(5, 'Views Count')[['Title', 'Views Count']].to_string(index=False)}
+
+    Top 5 Liked Videos:
+    {videos_df.nlargest(5, 'Likes Count')[['Title', 'Likes Count']].to_string(index=False)}
+
+    Video Upload Frequency (last 12 months):
+    {videos_df['Month'].value_counts().sort_index().to_string()}
+
+    Based on this data, provide:
+    1. 3-5 key insights about the channel's performance
+    2. 5-7 actionable suggestions for improving engagement and growing the channel
+
+    Format the output as two separate lists: one for Insights and one for Suggestions. Each list should be prefixed with either "Insights:" or "Suggestions:" respectively.
+    """
+
+    insights_and_suggestions = generate_response_with_gemini(prompt)
+    return insights_and_suggestions
+
+def generate_response_with_gemini(prompt):
+    api_key = st.secrets["gemini_api_key"]
+    api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={api_key}"
+
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    body = {
+        'contents': [
+            {
+                'parts': [
+                    { 'text': prompt }
+                ]
+            }
+        ]
+    }
+
+    response = requests.post(api_url, headers=headers, json=body)
+    data = response.json()
+
+    if response.status_code == 200:
+        return data['candidates'][0]['content']['parts'][0]['text']
+    else:
+        raise Exception(f"Error generating response from Gemini API: {data}")
+
+
+
 def main():
     st.set_page_config(layout="wide", page_title="YouTube Channel Statistics")
 
@@ -295,6 +352,109 @@ def main():
 
                 # Display the table
                 st.dataframe(table_df)
+
+                # Generate insights and suggestions
+                st.markdown("<h2 class='section-header'>Channel Insights and Suggestions</h2>", unsafe_allow_html=True)
+                with st.spinner("Generating insights and suggestions..."):
+                    insights_and_suggestions = generate_insights_and_suggestions(
+                        channel_title, subscribers, total_views, video_count, channel_created_on, videos_df
+                    )
+                    
+                # Split insights and suggestions
+                insights, suggestions = insights_and_suggestions.split("Suggestions:")
+                insights = insights.replace("Insights:", "").strip()
+                suggestions = suggestions.strip()
+
+                # Create two columns for insights and suggestions
+                col1, col2 = st.columns(2)
+
+                # Custom CSS for the insights and suggestions boxes
+                st.markdown("""
+                <style>
+                .insights-box, .suggestions-box {
+                    border: 1px solid #ddd;
+                    border-radius: 5px;
+                    padding: 15px;
+                    position: relative;
+                    height: 400px;
+                    overflow-y: auto;
+                }
+                .box-title {
+                    font-weight: bold;
+                    font-size: 1.2em;
+                    margin-bottom: 10px;
+                }
+                .copy-btn {
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    background-color: #4CAF50;
+                    color: white;
+                    border: none;
+                    border-radius: 3px;
+                    padding: 5px 10px;
+                    cursor: pointer;
+                }
+                .copy-btn:hover {
+                    background-color: #45a049;
+                }
+                </style>
+                """, unsafe_allow_html=True)
+
+                # JavaScript for typewriter effect and copy functionality
+                st.markdown("""
+                <script>
+                function typeWriter(text, elementId, speed = 50) {
+                    let i = 0;
+                    const element = document.getElementById(elementId);
+                    element.innerHTML = '';
+                    function type() {
+                        if (i < text.length) {
+                            element.innerHTML += text.charAt(i);
+                            i++;
+                            setTimeout(type, speed);
+                        }
+                    }
+                    type();
+                }
+
+                function copyText(elementId) {
+                    const element = document.getElementById(elementId);
+                    const text = element.innerText;
+                    navigator.clipboard.writeText(text).then(function() {
+                        alert('Copied to clipboard!');
+                    }, function(err) {
+                        console.error('Could not copy text: ', err);
+                    });
+                }
+                </script>
+                """, unsafe_allow_html=True)
+
+                # Display insights in the first column
+                with col1:
+                    st.markdown("""
+                    <div class="insights-box">
+                        <div class="box-title">Insights</div>
+                        <button class="copy-btn" onclick="copyText('insights-text')">Copy</button>
+                        <div id="insights-text"></div>
+                    </div>
+                    <script>
+                    typeWriter(`{}`, 'insights-text');
+                    </script>
+                    """.format(insights.replace('\n', '<br>')), unsafe_allow_html=True)
+
+                # Display suggestions in the second column
+                with col2:
+                    st.markdown("""
+                    <div class="suggestions-box">
+                        <div class="box-title">Suggestions</div>
+                        <button class="copy-btn" onclick="copyText('suggestions-text')">Copy</button>
+                        <div id="suggestions-text"></div>
+                    </div>
+                    <script>
+                    typeWriter(`{}`, 'suggestions-text');
+                    </script>
+                    """.format(suggestions.replace('\n', '<br>')), unsafe_allow_html=True)
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
