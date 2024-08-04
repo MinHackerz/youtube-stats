@@ -131,13 +131,6 @@ def generate_response_with_gemini(prompt):
     else:
         raise Exception(f"Error generating response from Gemini API: {data}")
 
-def typewriter_effect(text, speed=0.05):
-    displayed_text = st.empty()
-    for i in range(len(text) + 1):
-        displayed_text.markdown(text[:i] + "▌")
-        time.sleep(speed)
-    displayed_text.markdown(text)
-
 
 
 def main():
@@ -361,7 +354,7 @@ def main():
                 st.dataframe(table_df)
 
                 # Generate insights and suggestions
-                st.markdown("<h2 class='section-header'>Channel Insights and Suggestions</h2>", unsafe_allow_html=True)
+                st.markdown("<h2 class='section-header'>AI Generated Insights and Suggestions</h2>", unsafe_allow_html=True)
                 with st.spinner("Generating insights and suggestions..."):
                     insights_and_suggestions = generate_insights_and_suggestions(
                         channel_title, subscribers, total_views, video_count, channel_created_on, videos_df
@@ -378,20 +371,20 @@ def main():
                 # Display insights in the first column
                 with col1:
                     st.markdown("<div class='insights-box'><div class='box-title'>Insights</div>", unsafe_allow_html=True)
-                    typewriter_effect(insights)
+                    st.markdown(insights)
                     st.markdown("</div>", unsafe_allow_html=True)
                     if st.button("Copy Insights", key="copy_insights"):
                         st.write("Insights copied to clipboard!")
-                        st.write(insights)  # This will make the text selectable for copying
+                        st.text_area("Insights", insights, height=200)
 
                 # Display suggestions in the second column
                 with col2:
                     st.markdown("<div class='suggestions-box'><div class='box-title'>Suggestions</div>", unsafe_allow_html=True)
-                    typewriter_effect(suggestions)
+                    st.markdown(suggestions)
                     st.markdown("</div>", unsafe_allow_html=True)
                     if st.button("Copy Suggestions", key="copy_suggestions"):
                         st.write("Suggestions copied to clipboard!")
-                        st.write(suggestions)  # This will make the text selectable for copying
+            st.text_area("Suggestions", suggestions, height=200)
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
