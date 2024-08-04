@@ -362,27 +362,33 @@ def main():
                 insights, suggestions = insights_and_suggestions.split("Suggestions:")
                 insights = insights.replace("Insights:", "").strip()
                 suggestions = suggestions.strip()
-
+            
+                # Store insights and suggestions in session state
+                if 'insights' not in st.session_state:
+                    st.session_state['insights'] = insights
+                if 'suggestions' not in st.session_state:
+                    st.session_state['suggestions'] = suggestions
+            
                 # Create two columns for insights and suggestions
                 col1, col2 = st.columns(2)
-
+            
                 # Display insights in the first column
                 with col1:
                     st.markdown("<div class='insights-box'><div class='box-title'>Insights</div>", unsafe_allow_html=True)
-                    st.markdown(insights)
+                    st.markdown(st.session_state['insights'])
                     st.markdown("</div>", unsafe_allow_html=True)
                     if st.button("Copy Insights", key="copy_insights"):
                         st.write("Insights copied to clipboard!")
-                        st.text_area("Insights", insights, height=200)
-
+                        st.text_area("Insights", st.session_state['insights'], height=200)
+            
                 # Display suggestions in the second column
                 with col2:
                     st.markdown("<div class='suggestions-box'><div class='box-title'>Suggestions</div>", unsafe_allow_html=True)
-                    st.markdown(suggestions)
+                    st.markdown(st.session_state['suggestions'])
                     st.markdown("</div>", unsafe_allow_html=True)
                     if st.button("Copy Suggestions", key="copy_suggestions"):
                         st.write("Suggestions copied to clipboard!")
-                        st.text_area("Suggestions", suggestions, height=200)
+                        st.text_area("Suggestions", st.session_state['suggestions'], height=200)
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
