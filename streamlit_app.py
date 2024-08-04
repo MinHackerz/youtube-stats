@@ -78,7 +78,7 @@ def get_channel_and_video_data(channel_id):
 
 def generate_insights_and_suggestions(channel_title, subscribers, total_views, video_count, channel_created_on, videos_df):
     prompt = f"""
-    Analyze the following YouTube channel statistics and provide insights and suggestions for better engagement:
+    Act as an Expert of Analyzing Youtube Channels by analyzing different Charts of a Youtube Channel and Analyze the following YouTube channel statistics and provide insights and suggestions for better engagement:
 
     Channel Name: {channel_title}
     Subscribers: {subscribers:,}
@@ -363,45 +363,24 @@ def main():
                 insights = insights.replace("Insights:", "").strip()
                 suggestions = suggestions.strip()
             
-                # Store insights and suggestions in session state
-                if 'insights' not in st.session_state:
-                    st.session_state['insights'] = insights
-                if 'suggestions' not in st.session_state:
-                    st.session_state['suggestions'] = suggestions
-            
-                # JavaScript function to copy text to clipboard
-                copy_js = """
-                <script>
-                function copyToClipboard(text) {
-                    const el = document.createElement('textarea');
-                    el.value = text;
-                    document.body.appendChild(el);
-                    el.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(el);
-                    alert('Copied to clipboard');
-                }
-                </script>
-                """
-            
-                st.markdown(copy_js, unsafe_allow_html=True)
-            
                 # Create two columns for insights and suggestions
                 col1, col2 = st.columns(2)
             
                 # Display insights in the first column
                 with col1:
-                    st.markdown("<div class='insights-box'><div class='box-title'>Insights</div>", unsafe_allow_html=True)
-                    st.markdown(st.session_state['insights'])
-                    st.markdown("</div>", unsafe_allow_html=True)
-                    st.button("Copy Insights", on_click=lambda: st.markdown(f"<script>copyToClipboard(`{st.session_state['insights']}`)</script>", unsafe_allow_html=True))
+                    st.markdown("<div class='insights-box'><div class='box-title'>Insights</div><ul>", unsafe_allow_html=True)
+                    insights_lines = insights.split("\n")
+                    for line in insights_lines:
+                        st.markdown(f"<li>{line}</li>", unsafe_allow_html=True)
+                    st.markdown("</ul></div>", unsafe_allow_html=True)
             
                 # Display suggestions in the second column
                 with col2:
-                    st.markdown("<div class='suggestions-box'><div class='box-title'>Suggestions</div>", unsafe_allow_html=True)
-                    st.markdown(st.session_state['suggestions'])
-                    st.markdown("</div>", unsafe_allow_html=True)
-                    st.button("Copy Suggestions", on_click=lambda: st.markdown(f"<script>copyToClipboard(`{st.session_state['suggestions']}`)</script>", unsafe_allow_html=True))
+                    st.markdown("<div class='suggestions-box'><div class='box-title'>Suggestions</div><ul>", unsafe_allow_html=True)
+                    suggestions_lines = suggestions.split("\n")
+                    for line in suggestions_lines:
+                        st.markdown(f"<li>{line}</li>", unsafe_allow_html=True)
+                    st.markdown("</ul></div>", unsafe_allow_html=True)
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
